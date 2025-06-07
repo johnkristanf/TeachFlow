@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { RadioGroupItem, RadioGroup } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
 import { PrimaryButton } from '../ui/primary-button'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
     Drawer,
@@ -16,10 +16,25 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from '@/components/ui/drawer'
+import RubricTypeTabs from '../rubrics/rubric-type-tabs'
+import { useRubricStore } from '@/store/useStoreRubric'
+import { convertBase64ToFile, formatFileSize } from '@/lib/utils'
+import { pythonServerBaseURLV1 } from '@/api/base'
+import { Criterion } from '@/types/rubrics'
 
-export function EssayGradingForm() {
+type EssayGradingFormProps = {
+    onCloseDialog?: () => void
+}
+
+export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
+    // SELECTED RUBRIC BY STATE MANAGEMENT
+    const selectedRubricCriteria = useRubricStore((state) => state.criteria)
+    const selectedRubric = useRubricStore((state) => state.rubric)
+
+    const queryClient = useQueryClient()
+
     const [formData, setFormData] = useState({
-        rubric: 'sample-highschool-expository',
+        rubric_criteria: [] as Criterion[],
         gradingMethod: 'files',
         files: [] as File[],
         textContent: '',
@@ -38,7 +53,7 @@ export function EssayGradingForm() {
         e.target.value = ''
     }
 
-    // Remove uplaoded file
+    // Remove uploaded file
     const removeFile = (indexToRemove: number) => {
         setFormData((prev) => ({
             ...prev,
@@ -61,21 +76,24 @@ export function EssayGradingForm() {
         }))
     }
 
+    const handleDropFile = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+
+        const droppedFiles = Array.from(e.dataTransfer.files)
+        if (droppedFiles.length) {
+            setFormData((prev) => ({
+                ...prev,
+                files: [...prev.files, ...droppedFiles],
+            }))
+        }
+    }
+
     const triggerFileInput = () => {
         const fileInput = document.getElementById('hidden-file-input') as HTMLInputElement
         fileInput?.click()
     }
 
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes'
-        const k = 1024
-        const sizes = ['Bytes', 'KB', 'MB', 'GB']
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-    }
-
     // WEBCAM FUNCTIONALITIES
-
     const [webcamActive, setWebcamActive] = useState(false)
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -139,14 +157,54 @@ export function EssayGradingForm() {
         }
     }
 
+    const mutation = useMutation({
+        mutationFn: async (data: FormData) => {
+            const res = await fetch(`${pythonServerBaseURLV1}/essay/grade`, {
+                method: 'POST',
+                body: data,
+            })
+
+            if (!res.ok) {
+                const error = await res.json()
+                throw new Error(error?.message || 'Failed to create rubric')
+            }
+
+            return res.json()
+        },
+
+        onSuccess: (response) => {
+            console.log('Essay graded:', response)
+            queryClient.invalidateQueries({ queryKey: ['essays'] })
+            toast.success('Essay Graded Successfully!')
+
+            setTimeout(() => {
+                if(onCloseDialog) onCloseDialog()
+            }, 1500)
+        },
+
+        onError: (err) => {
+            console.error('Error grading essay:', err)
+        },
+    })
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
+        formData.rubric_criteria = selectedRubricCriteria
+
+        if (selectedRubric.name == '') {
+            toast.warning('You must select a grading rubric')
+            return
+        }
+
+        console.log('formData.rubric_criteria: ', formData.rubric_criteria)
 
         const submitData = new FormData()
-        submitData.append('rubric', formData.rubric)
+        submitData.append('rubric_name', selectedRubric.name)
+        submitData.append('rubric_criteria', JSON.stringify(formData.rubric_criteria))
         submitData.append('gradingMethod', formData.gradingMethod)
 
         if (formData.gradingMethod === 'files' && formData.files) {
+            // Append each uploaded files
             for (let i = 0; i < formData.files.length; i++) {
                 submitData.append('files', formData.files[i])
             }
@@ -155,35 +213,16 @@ export function EssayGradingForm() {
         } else if (formData.gradingMethod === 'webcam') {
             // Convert base64 images to files
             formData.capturedImages.forEach((imageData, index) => {
-                // Convert base64 to blob
-                const byteCharacters = atob(imageData.split(',')[1])
-                const byteNumbers = new Array(byteCharacters.length)
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i)
-                }
-                const byteArray = new Uint8Array(byteNumbers)
-                const blob = new Blob([byteArray], { type: 'image/jpeg' })
-                const file = new File([blob], `captured-image-${index + 1}.jpg`, {
-                    type: 'image/jpeg',
-                })
-
-                submitData.append('capturedImages', file)
+                const file = convertBase64ToFile(imageData, index)
+                submitData.append('files', file)
             })
         }
 
-        console.log('Form Data:', formData)
         console.log('Submit Data:', Array.from(submitData.entries()))
 
         // Handle form submission here
-        // You can send this data to your API endpoint
+        mutation.mutate(submitData)
     }
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            stopWebcam()
-        }
-    }, [])
 
     // Effect to assign stream to video element when webcam becomes active
     useEffect(() => {
@@ -192,18 +231,12 @@ export function EssayGradingForm() {
         }
     }, [webcamActive])
 
-    const {
-        data: rubrics,
-        isLoading,
-        error,
-    } = useQuery({
-        queryKey: ['rubrics'],
-        queryFn: async () => {
-            const res = await fetch('/api/rubrics')
-            if (!res.ok) throw new Error('Failed to fetch rubrics')
-            return res.json()
-        },
-    })
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            stopWebcam()
+        }
+    }, [])
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -211,34 +244,53 @@ export function EssayGradingForm() {
                 <div className="flex items-center justify-between">
                     <label className="text-base font-medium">Rubric</label>
 
-                    <Drawer direction='right'>
-                        <DrawerTrigger asChild >
+                    <Drawer direction="right">
+                        <DrawerTrigger asChild>
                             <PrimaryButton type="button" variant="solid" color="blue" size="sm">
-                                Choose a different rubric
+                                Select Essay Rubric
                             </PrimaryButton>
                         </DrawerTrigger>
                         <DrawerContent>
                             <DrawerHeader>
-                                <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-                                <DrawerDescription>This action cannot be undone.</DrawerDescription>
+                                <DrawerTitle>Select Rubric</DrawerTitle>
                             </DrawerHeader>
+
+                            {/* TABS */}
+                            <RubricTypeTabs />
                         </DrawerContent>
                     </Drawer>
                 </div>
 
-                <div className="flex items-center space-x-3 p-4 bg-white rounded-lg">
-                    <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
-                        📄
-                    </div>
-                    <div>
-                        <p className="font-medium">Sample Highschool Expository Rubric</p>
-                    </div>
+                <div className="flex justify-between p-4 bg-white rounded-lg">
+                    {selectedRubricCriteria && selectedRubricCriteria.length > 0 ? (
+                        <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                                📄
+                            </div>
+                            <p className="font-medium">{selectedRubric.name}</p>
+                        </div>
+                    ) : (
+                        <h1 className="text-blue-600 font-semibold">No Essay Rubric Selected</h1>
+                    )}
+
+                    {selectedRubric?.created_by ? (
+                        <p className="text-sm">
+                            Created by{' '}
+                            <span className="font-semibold">
+                                {selectedRubric.created_by === 'teachflow_rubrics'
+                                    ? 'TeachFlow'
+                                    : 'Me'}
+                            </span>
+                        </p>
+                    ) : (
+                        <p className="text-sm">&nbsp;</p> // renders empty line to keep layout consistent
+                    )}
                 </div>
             </div>
 
             {/* Upload Method */}
 
-            <div className="space-y-3">
+            <div className="space-y-3 bg-gray-100 p-3 rounded-md">
                 <label className="text-base font-medium">
                     Upload essay(s) <span className="text-red-500">*</span>
                 </label>
@@ -273,7 +325,11 @@ export function EssayGradingForm() {
                 {formData.gradingMethod === 'files' && (
                     <div className="space-y-4">
                         {/* Upload Drop Zone - Show when no files or allow adding more */}
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                        <div
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={handleDropFile}
+                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+                        >
                             <div className="space-y-4">
                                 {/* Selected Files Display */}
                                 {formData.files.length > 0 ? (
@@ -347,7 +403,7 @@ export function EssayGradingForm() {
                                     </div>
                                 ) : (
                                     <div>
-                                        <p className="text-gray-600 mb-3">
+                                        <p className="text-gray-600">
                                             Drop files here,{' '}
                                             <button
                                                 type="button"
@@ -388,7 +444,7 @@ export function EssayGradingForm() {
                                     id="hidden-file-input"
                                     type="file"
                                     multiple
-                                    accept=".pdf,.doc,.docx,.txt"
+                                    accept="image/*" // temporarily only accept image, upgrade later for scalability
                                     onChange={handleFileChange}
                                     className="hidden"
                                 />
@@ -521,8 +577,17 @@ export function EssayGradingForm() {
             </div>
 
             <div className="flex justify-end">
-                <PrimaryButton type="submit" variant="solid" color="blue" size="md">
-                    Submit
+                <PrimaryButton
+                    type="submit"
+                    variant="solid"
+                    color="blue"
+                    size="md"
+                    disabled={mutation.isPending}
+                    className={
+                        mutation.isPending ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed' : ''
+                    }
+                >
+                    {mutation.isPending ? 'Submitting...' : 'Submit'}
                 </PrimaryButton>
             </div>
         </form>

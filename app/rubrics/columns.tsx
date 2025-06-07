@@ -1,5 +1,6 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
 import { PrimaryButton } from '@/components/ui/primary-button'
 import { Rubric } from '@/types/rubrics'
 import { ColumnDef } from '@tanstack/react-table'
@@ -22,12 +23,21 @@ export const columns: ColumnDef<Rubric>[] = [
         header: 'Language',
     },
     {
-        accessorKey: 'createdAt',
-        header: 'Created At',
+        accessorKey: 'created_by',
+        header: 'Created By',
         cell: ({ getValue }) => {
-            const date = new Date(getValue() as string)
-            return date.toLocaleDateString()
-        },
+        const value = getValue() as string
+        const isTeachFlow = value === 'teachflow_rubrics'
+        const label = isTeachFlow ? 'TeachFlow' : 'Me'
+        const color = isTeachFlow ? 'bg-blue-600' : 'bg-yellow-600'
+        const textColor = 'text-white'
+
+        return (
+            <Badge className={`${color} ${textColor}`}>
+                {label}
+            </Badge>
+        )
+    },
     },
 
     {

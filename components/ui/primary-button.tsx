@@ -24,9 +24,9 @@ const variants: Record<Variant, Record<Color, string>> = {
         black: 'bg-gray-800 hover:bg-gray-900 text-white',
     },
     outline: {
-        black: 'border border-gray-900 text-gray-600 hover:bg-gray-50',
-        blue: 'border border-blue-900 text-blue-600 hover:bg-blue-50',
-        red: 'border border-red-900 text-red-600 hover:bg-red-50',
+        black: 'border border-gray-900 text-gray-600 hover:bg-gray-100',
+        blue: 'border border-blue-900 text-blue-600 hover:bg-blue-100',
+        red: 'border border-red-900 text-red-600 hover:bg-red-100',
     },
 }
 

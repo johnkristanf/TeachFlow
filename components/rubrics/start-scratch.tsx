@@ -14,7 +14,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Trash2 } from 'lucide-react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Switch } from '../ui/switch'
 
@@ -141,12 +141,15 @@ const StartScratchRubric = () => {
         },
     })
 
+    const queryyClient = useQueryClient()
+
     const onSubmit = (data: any) => {
-        console.log("data rubric: ", data);
-        
+        console.log('data rubric: ', data)
+
         mutation.mutate(data, {
             onSuccess: (response) => {
                 console.log('Rubric saved:', response)
+                queryyClient.invalidateQueries({ queryKey: ['rubrics'] })
                 toast.success('Rubric Created Successfully!')
             },
             onError: (err) => {
@@ -208,7 +211,6 @@ const StartScratchRubric = () => {
                             ))}
                         </div>
                     </div>
-
 
                     {/* Rubric Criteria */}
                     {criteriaFields.map((field, index) => (

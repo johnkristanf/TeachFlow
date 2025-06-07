@@ -1,5 +1,5 @@
-import { columns, Payment } from './columns'
-import { DataTable } from '@/components/data-table'
+'use client'
+
 import { PrimaryButton } from '@/components/ui/primary-button'
 
 import {
@@ -10,31 +10,35 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { EssayGradingForm } from '@/components/essay/grading-form'
+import { EssayGradingForm } from '@/components/essays/grading-form'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { columns } from './columns'
+import { DataTable } from '@/components/data-table'
 
+export default function EssayPage() {
+    const [openDialog, setOpenDialog] = useState<boolean>(false)
 
-export default async function EssayPage() {
-    async function getData(): Promise<Payment[]> {
-        // Fetch data from your API here.
-        return [
-            {
-                id: '728ed52f',
-                amount: 100,
-                status: 'pending',
-                email: 'm@example.com',
-            },
-            // ...
-        ]
-    }
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['essays'],
+        queryFn: async () => {
+            try {
+                const res = await fetch('http://localhost:8000/api/v1/get/essays')
+                return res.json()
+            } catch (error: any) {
+                throw new Error('Failed to fetch essays: ', error)
+            }
+        },
+    })
 
-    const data = await getData()
+    console.log('Essays Data: ', data)
 
     return (
         <div className="mt-5">
             <div className="flex justify-between items-center">
                 <h1 className="text-4xl text-blue-500 mb-5">Essays</h1>
 
-                <Dialog>
+                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                     <DialogTrigger asChild>
                         <PrimaryButton color="blue" variant="outline">
                             Grade New Essay
@@ -50,13 +54,12 @@ export default async function EssayPage() {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <EssayGradingForm />
+                        <EssayGradingForm onCloseDialog={() => setOpenDialog(false)} />
                     </DialogContent>
                 </Dialog>
             </div>
 
-            <DataTable columns={columns} data={data} isLoading={false} />
+            <DataTable columns={columns} data={data ?? []} isLoading={isLoading} />
         </div>
     )
 }
-

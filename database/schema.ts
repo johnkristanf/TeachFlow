@@ -6,7 +6,7 @@ export const rubrics = pgTable('rubrics', {
     grade: text('grade').notNull(),
     intensity: text('intensity').notNull(),
     language: text('language').notNull(),
-    type: text('type'), // advanced or simple 
+    created_by: text('created_by'),
     createdAt: timestamp('created_at').defaultNow(),
 })
 
