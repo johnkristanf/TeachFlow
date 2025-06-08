@@ -1,5 +1,6 @@
-import { pgTable, serial, text, timestamp, integer } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, uuid, varchar, timestamp, integer } from 'drizzle-orm/pg-core'
 
+// RUBRICS
 export const rubrics = pgTable('rubrics', {
     id: serial('id').primaryKey(),
     name: text('name').notNull(),
@@ -10,6 +11,7 @@ export const rubrics = pgTable('rubrics', {
     createdAt: timestamp('created_at').defaultNow(),
 })
 
+// CRITERIA
 export const criteria = pgTable('criteria', {
     id: serial('id').primaryKey(),
     rubricId: integer('rubric_id')
@@ -18,6 +20,7 @@ export const criteria = pgTable('criteria', {
     title: text('title').notNull(),
 })
 
+// LEVELS
 export const levels = pgTable('levels', {
     id: serial('id').primaryKey(),
     criterionId: integer('criterion_id')
@@ -27,3 +30,16 @@ export const levels = pgTable('levels', {
     score: integer('score').notNull(),
     description: text('description'),
 })
+
+
+// ESSAY
+export const essay = pgTable("essay", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }),
+  rubricUsed: text("rubric_used").notNull(),
+  sourceType: text("source_type").notNull(), // 'files upload' or 'text'
+  essayText: text("essay_text").notNull(),
+  status: text("status").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+});
+
