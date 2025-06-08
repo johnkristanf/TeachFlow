@@ -1,4 +1,3 @@
-// /app/api/rubrics/route.ts
 import { getAllRubrics, getRubricsWithDetails } from '@/lib/queries/rubrics/get'
 import { createRubric } from '@/lib/queries/rubrics/post'
 import { NextResponse } from 'next/server'
