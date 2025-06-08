@@ -159,7 +159,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
     const mutation = useMutation({
         mutationFn: async (data: FormData) => {
-            const res = await fetch(`${pythonServerBaseURLV1}/essay/grade`, {
+            const res = await fetch(`/api/essay`, {
                 method: 'POST',
                 body: data,
             })
@@ -175,10 +175,10 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         onSuccess: (response) => {
             console.log('Essay graded:', response)
             queryClient.invalidateQueries({ queryKey: ['essays'] })
-            toast.success('Essay Graded Successfully!')
+            toast.success('Essay Submitted for Evaluation!')
 
             setTimeout(() => {
-                if(onCloseDialog) onCloseDialog()
+                if (onCloseDialog) onCloseDialog()
             }, 1500)
         },
 
@@ -365,40 +365,60 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                            {formData.files.map((file, index) => (
-                                                <div
-                                                    key={`${file.name}-${index}`}
-                                                    className="relative"
-                                                >
-                                                    <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeFile(index)}
-                                                            className="absolute -top-2 -right-2 w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm hover:bg-gray-800 z-10"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                        <div className="flex flex-col items-center space-y-2">
-                                                            <div className="w-12 h-16 bg-white rounded border border-gray-300 flex items-center justify-center">
-                                                                <div className="w-8 h-10 bg-gray-200 rounded flex items-center justify-center">
-                                                                    📄
+                                            {formData.files.map((file, index) => {
+                                                const isImage = file.type.startsWith('image/')
+                                                const previewUrl = isImage
+                                                    ? URL.createObjectURL(file)
+                                                    : null
+
+                                                return (
+                                                    <div
+                                                        key={`${file.name}-${index}`}
+                                                        className="relative"
+                                                    >
+                                                        <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeFile(index)}
+                                                                className="absolute -top-2 -right-2 w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm hover:bg-gray-800 z-10"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                            <div className="flex flex-col items-center space-y-2">
+                                                                <div className="w-full h-40 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden">
+                                                                    {isImage ? (
+                                                                        <img
+                                                                            src={previewUrl!}
+                                                                            alt={file.name}
+                                                                            className="object-contain w-full h-full"
+                                                                            onLoad={() =>
+                                                                                URL.revokeObjectURL(
+                                                                                    previewUrl!
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-8 h-10 bg-gray-200 rounded flex items-center justify-center text-2xl">
+                                                                            📄
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                            </div>
-                                                            <div className="text-center">
-                                                                <p
-                                                                    className="text-sm font-medium text-gray-900 truncate max-w-[150px]"
-                                                                    title={file.name}
-                                                                >
-                                                                    {file.name}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {formatFileSize(file.size)}
-                                                                </p>
+                                                                <div className="text-center mt-2">
+                                                                    <p
+                                                                        className="text-sm font-medium text-gray-900 truncate max-w-[150px]"
+                                                                        title={file.name}
+                                                                    >
+                                                                        {file.name}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {formatFileSize(file.size)}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                )
+                                            })}
                                         </div>
                                     </div>
                                 ) : (

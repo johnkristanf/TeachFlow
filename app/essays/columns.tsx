@@ -11,6 +11,9 @@ import {
 } from '@/components/ui/dialog'
 import { useState } from 'react'
 import { PrimaryButton } from '@/components/ui/primary-button'
+import { EssayWithEvalSummary } from '@/types/essay'
+
+import { Loader2 } from 'lucide-react'
 
 export type Essay = {
     id: string
@@ -37,7 +40,7 @@ type Evaluation = {
 }
 
 // Define the columns for the table
-export const columns: ColumnDef<Essay>[] = [
+export const columns: ColumnDef<EssayWithEvalSummary>[] = [
     {
         accessorKey: 'name',
         header: 'Essay Name',
@@ -62,9 +65,14 @@ export const columns: ColumnDef<Essay>[] = [
             const badgeClass = colorMap[status] || 'bg-gray-100 text-gray-800'
 
             return (
-                <Badge className={badgeClass} variant="outline">
-                    {status.toUpperCase()}
-                </Badge>
+                <div className="flex items-center gap-2">
+                    {status === 'pending' && (
+                        <Loader2 className="w-4 h-4 animate-spin text-yellow-600" />
+                    )}
+                    <Badge className={badgeClass} variant="outline">
+                        {status.toUpperCase()}
+                    </Badge>
+                </div>
             )
         },
     },
@@ -74,11 +82,17 @@ export const columns: ColumnDef<Essay>[] = [
         cell: ({ row }) => {
             const essay = row.original
             const [open, setOpen] = useState<boolean>(false)
+            const isPending = essay.status === 'pending'
 
             return (
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
-                        <PrimaryButton color="blue" size="sm">
+                        <PrimaryButton
+                            color="blue"
+                            size="sm"
+                            disabled={isPending}
+                            className={isPending ? 'opacity-50 cursor-not-allowed' : ''}
+                        >
                             Preview
                         </PrimaryButton>
                     </DialogTrigger>
@@ -119,13 +133,13 @@ export const columns: ColumnDef<Essay>[] = [
                                     ))}
 
                                     {/* Overall Grade Section */}
-                                    {essay.evaluations[0]?.overall_feedback && (
+                                    {essay.summary && essay.summary.overall_feedback && (
                                         <div className="bg-blue-600 text-white border rounded-lg p-4 shadow-sm space-y-3">
                                             <h1 className="text-xl font-semibold">
                                                 Overall Feedback
                                             </h1>
                                             <p className="text-md">
-                                                {essay.evaluations[0].overall_feedback}
+                                                {essay.summary.overall_feedback}
                                             </p>
                                         </div>
                                     )}

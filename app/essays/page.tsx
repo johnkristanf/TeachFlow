@@ -11,27 +11,58 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { EssayGradingForm } from '@/components/essays/grading-form'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { columns } from './columns'
 import { DataTable } from '@/components/data-table'
+import { EssayWithEvalSummary } from '@/types/essay'
 
 export default function EssayPage() {
     const [openDialog, setOpenDialog] = useState<boolean>(false)
+    const [timer, setTimer] = useState<number>(30) // countdown in seconds
+    const [pollingInterval, setPollingInterval] = useState<false | number>(false)
+    const [hasPendingStatus, setHasPendingStatus] = useState<boolean>(false)
 
-    const { data, isLoading, error } = useQuery({
+    const {
+        data = [],
+        isLoading,
+    } = useQuery<EssayWithEvalSummary[], Error>({
         queryKey: ['essays'],
         queryFn: async () => {
-            try {
-                const res = await fetch('http://localhost:8000/api/v1/get/essays')
-                return res.json()
-            } catch (error: any) {
-                throw new Error('Failed to fetch essays: ', error)
-            }
+            const res = await fetch('/api/essay')
+            if (!res.ok) throw new Error('Failed to fetch essays')
+            return res.json()
         },
+        refetchInterval: pollingInterval,
     })
 
-    console.log('Essays Data: ', data)
+    console.log('Essays Data 123: ', data)
+
+    // Timer countdown logic - reset on every fetch/refetch
+    useEffect(() => {
+        if (!data) return
+
+        const hasPending = data.some((essay) => essay.status === 'pending')
+
+        if (hasPending) {
+            setHasPendingStatus(true)
+            setPollingInterval(hasPending ? 30000 : false)
+            setTimer(30)
+
+            // Create interval to count down every second
+            const intervalId = setInterval(() => {
+                setTimer((prev) => {
+                    if (prev <= 1) return 30 // reset after 0, since fetch will happen
+                    return prev - 1
+                })
+            }, 1000)
+
+            return () => clearInterval(intervalId)
+        } else {
+            setHasPendingStatus(false)
+        }
+        
+    }, [data])
 
     return (
         <div className="mt-5">
@@ -58,6 +89,12 @@ export default function EssayPage() {
                     </DialogContent>
                 </Dialog>
             </div>
+
+            {data && hasPendingStatus && (
+                <div className="mb-3 text-gray-600 font-medium">
+                    Next Update in {timer} second{timer !== 1 ? 's' : ''}
+                </div>
+            )}
 
             <DataTable columns={columns} data={data ?? []} isLoading={isLoading} />
         </div>
