@@ -1,0 +1,24 @@
+import * as amqp from 'amqplib'
+
+const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost'
+let connection: amqp.Connection | null = null
+let channel: amqp.Channel | null = null
+
+async function initRabbitMQ() {
+    if (!connection) {
+        connection = await amqp.connect(RABBITMQ_URL)
+        channel = await connection.createChannel()
+    }
+    return { connection, channel }
+}
+
+export async function publishToQueue(queue: string, message: any) {
+    const { channel } = await initRabbitMQ()
+    if (!channel) throw new Error('Failed to create channel')
+
+    await channel.assertQueue(queue, { durable: true })
+
+    channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+        persistent: true,
+    })
+}
