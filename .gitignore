@@ -35,6 +35,7 @@ yarn-error.log*
 
 # vercel
 .vercel
+teachflow-vision-key.json
 
 # typescript
 *.tsbuildinfo
