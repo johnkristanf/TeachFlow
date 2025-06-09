@@ -8,6 +8,7 @@ export async function createRubric(data: any) {
             name: data.name,
             grade: data.grade,
             intensity: data.intensity,
+            category: data.category,
             language: data.language,
             created_by: 'my_rubrics'
         })
