@@ -36,8 +36,6 @@ export default function EssayPage() {
         refetchInterval: pollingInterval,
     })
 
-    console.log('Essays Data 123: ', data)
-
     // Timer countdown logic - reset on every fetch/refetch
     useEffect(() => {
         if (!data) return

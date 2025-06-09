@@ -37,7 +37,6 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         rubric_criteria: [] as Criterion[],
         gradingMethod: 'files',
         files: [] as File[],
-        textContent: '',
         capturedImages: [] as string[], // Base64 images from webcam
     })
 
@@ -208,8 +207,6 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
             for (let i = 0; i < formData.files.length; i++) {
                 submitData.append('files', formData.files[i])
             }
-        } else if (formData.gradingMethod === 'text') {
-            submitData.append('textContent', formData.textContent)
         } else if (formData.gradingMethod === 'webcam') {
             // Convert base64 images to files
             formData.capturedImages.forEach((imageData, index) => {
@@ -309,10 +306,6 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                     <div className="flex items-center space-x-2">
                         <RadioGroupItem value="files" id="files" />
                         <label htmlFor="files">Select files</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="text" id="text" />
-                        <label htmlFor="text">Enter text</label>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -473,19 +466,6 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                     </div>
                 )}
 
-                {/* Text Input Area */}
-                {formData.gradingMethod === 'text' && (
-                    <div className="flex flex-col gap-2 mt-5">
-                        <label htmlFor="essayText">Paste your essay text here:</label>
-                        <textarea
-                            id="essayText"
-                            value={formData.textContent}
-                            onChange={handleTextChange}
-                            className="w-full h-32 p-3 border border-gray-300 rounded-md resize-vertical"
-                            placeholder="Paste your essay content here..."
-                        />
-                    </div>
-                )}
 
                 {/* Webcam Area */}
                 {formData.gradingMethod === 'webcam' && (
@@ -604,7 +584,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                     size="md"
                     disabled={mutation.isPending}
                     className={
-                        mutation.isPending ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed' : ''
+                        mutation.isPending ? 'bg-gray-500 cursor-not-allowed' : ''
                     }
                 >
                     {mutation.isPending ? 'Submitting...' : 'Submit'}

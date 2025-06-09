@@ -70,7 +70,7 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
                         <Loader2 className="w-4 h-4 animate-spin text-yellow-600" />
                     )}
                     <Badge className={badgeClass} variant="outline">
-                        {status.toUpperCase()}
+                        {status === 'pending' ? "EVALUATING" : status.toUpperCase()}
                     </Badge>
                 </div>
             )
