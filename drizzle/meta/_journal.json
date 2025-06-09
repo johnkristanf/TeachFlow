@@ -8,6 +8,13 @@
       "when": 1749347079730,
       "tag": "0000_handy_violations",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749428880650,
+      "tag": "0001_powerful_secret_warriors",
+      "breakpoints": true
     }
   ]
 }

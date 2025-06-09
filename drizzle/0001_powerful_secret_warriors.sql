@@ -1,0 +1,1 @@
+ALTER TABLE "rubrics" ADD COLUMN "category" text NOT NULL;
