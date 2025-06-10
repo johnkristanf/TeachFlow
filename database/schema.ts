@@ -1,4 +1,13 @@
-import { pgTable, serial, text, uuid, varchar, timestamp, integer } from 'drizzle-orm/pg-core'
+import {
+    pgTable,
+    serial,
+    text,
+    uuid,
+    varchar,
+    timestamp,
+    integer,
+    pgEnum,
+} from 'drizzle-orm/pg-core'
 
 // RUBRICS
 export const rubrics = pgTable('rubrics', {
@@ -32,15 +41,29 @@ export const levels = pgTable('levels', {
     description: text('description'),
 })
 
-
 // ESSAY
-export const essay = pgTable("essay", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name", { length: 255 }),
-  rubricUsed: text("rubric_used").notNull(),
-  sourceType: text("source_type").notNull(), // 'files upload' or 'text'
-  essayText: text("essay_text").notNull(),
-  status: text("status").notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
-});
+export const essay = pgTable('essay', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: varchar('name', { length: 255 }),
+    rubricUsed: text('rubric_used').notNull(),
+    sourceType: text('source_type').notNull(), // 'files upload' or 'text'
+    essayText: text('essay_text').notNull(),
+    status: text('status').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+})
 
+
+// FEEDBACK
+export const performanceEnum = pgEnum('performance_enum', ['fast', 'acceptable', 'slow'])
+export const feedback = pgTable('feedback', {
+    id: serial('id').primaryKey(),
+    rating: integer('rating').notNull(),
+    liked: text('liked').notNull(),
+    bugs: text('bugs').notNull(),
+    confusing: text('confusing'),
+    suggestions: text('suggestions').notNull(),
+    contact: varchar('contact', { length: 255 }),
+    easeOfUse: integer('ease_of_use').notNull(),
+    performance: performanceEnum('performance').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+})

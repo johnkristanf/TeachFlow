@@ -15,6 +15,13 @@
       "when": 1749428880650,
       "tag": "0001_powerful_secret_warriors",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749502065340,
+      "tag": "0002_futuristic_namora",
+      "breakpoints": true
     }
   ]
 }
