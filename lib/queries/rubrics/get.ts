@@ -7,15 +7,23 @@ export async function getAllRubrics() {
     return data
 }
 
-export async function getRubricsWithDetails(source: string) {
-    const rubricList = await db
+export async function getRubricsWithDetails(source: string | null) {
+    const baseQuery = db
         .select({
             id: rubrics.id,
             name: rubrics.name,
+            grade: rubrics.grade,
+            intensity: rubrics.intensity,
+            category: rubrics.category,
+            language: rubrics.language,
             created_by: rubrics.created_by,
         })
         .from(rubrics)
-        .where(eq(rubrics.created_by, source))
+
+    const rubricList = source
+        ? await baseQuery.where(eq(rubrics.created_by, source))
+        : await baseQuery
+
     const rubricIds = rubricList.map((r) => r.id)
 
     // STEP 2: Get all criteria for those rubrics

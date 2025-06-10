@@ -7,7 +7,7 @@ import StartScratchRubric from '@/components/rubrics/start-scratch'
 import { useQuery } from '@tanstack/react-query'
 import BuildWithAI from '@/components/rubrics/build-with-ai'
 
-const RubricsPage = () => {
+export default function RubricsPage() {
     const { data, isLoading, error } = useQuery({
         queryKey: ['rubrics'],
         queryFn: async () => {
@@ -43,5 +43,3 @@ const RubricsPage = () => {
         </div>
     )
 }
-
-export default RubricsPage
