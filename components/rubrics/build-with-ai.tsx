@@ -9,21 +9,21 @@ import {
 } from '@/components/ui/dialog'
 import BuildWithAIForm from './build-with-ai-form'
 import { useState } from 'react'
-import { BuildWithAIRubric } from '@/types/rubrics'
 import EditableAIRubricForm from './editable-ai-rubric-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { SkeletonLoader } from '../skeleton-loading'
+import { Rubric } from '@/types/rubrics'
 
 const BuildWithAI = () => {
-    const [buildWithAIResponses, setBuildWithAIResponses] = useState<BuildWithAIRubric>()
+    const [buildWithAIResponses, setBuildWithAIResponses] = useState<Rubric>()
     const [openDialog, setOpenDialog] = useState<boolean>(false)
 
-    const queryyClient = useQueryClient()
+    const queryClient = useQueryClient()
     console.log('buildWithAIResponses: ', buildWithAIResponses)
 
     const mutation = useMutation({
-        mutationFn: async (data: BuildWithAIRubric) => {
+        mutationFn: async (data: Rubric) => {
             const res = await fetch('/api/rubrics', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -40,7 +40,7 @@ const BuildWithAI = () => {
 
         onSuccess: (response) => {
             console.log('Rubric saved:', response)
-            queryyClient.invalidateQueries({ queryKey: ['rubrics'] })
+            queryClient.invalidateQueries({ queryKey: ['rubrics'] })
             toast.success('Rubric Saved Successfully!')
 
             setTimeout(() => {
@@ -54,7 +54,7 @@ const BuildWithAI = () => {
         },
     })
 
-    const onSubmit = (updatedData: BuildWithAIRubric) => {
+    const onSubmit = (updatedData: Rubric) => {
         console.log('Final rubric submitted:', updatedData)
         mutation.mutate(updatedData)
     }

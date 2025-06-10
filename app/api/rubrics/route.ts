@@ -22,11 +22,10 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const source = searchParams.get('source')
 
+    console.log("source ni: ", source);
+    
     try {
-        const data = source
-            ? await getRubricsWithDetails(source) // filtered by tab source
-            : await getAllRubrics() // get everything (for full table view)
-
+        const data = await getRubricsWithDetails(source) // filtered by tab source
         return NextResponse.json(data)
     } catch (err) {
         console.error(err)

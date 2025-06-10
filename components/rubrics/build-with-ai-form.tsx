@@ -1,38 +1,21 @@
 import { DialogClose } from '@radix-ui/react-dialog'
 import { DialogFooter } from '../ui/dialog'
 import { PrimaryButton } from '../ui/primary-button'
-import { BuildWithAIRubric, BuildWithAIRubricCreate } from '@/types/rubrics'
+import { BuildWithAIRubricCreate, Rubric } from '@/types/rubrics'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Dispatch, SetStateAction } from 'react'
 import { SkeletonLoader } from '../skeleton-loading'
+import { essay_categories, grade, intensities, languages } from '@/constants/rubrics'
 
-const intensities = [
-    { label: 'Easy', icon: '✅' },
-    { label: 'Normal', icon: '🟡' },
-    { label: 'Strict', icon: '❌' },
-]
 
-const grade = ['Elementary', 'Middle School', 'High School', 'College']
-
-const essay_categories = [
-    'Argumentative',
-    'Descriptive',
-    'Expository',
-    'Narrative',
-    'Analytical',
-    'Reflective',
-    'Compare & Contrast',
-]
-
-const languages = ['US English', 'UK English', 'AUS English']
 
 const BuildWithAIForm = ({
     setBuildWithAIResponses,
 }: {
-    setBuildWithAIResponses: Dispatch<SetStateAction<BuildWithAIRubric | undefined>>
+    setBuildWithAIResponses: Dispatch<SetStateAction<Rubric | undefined>>
 }) => {
     const {
         register,

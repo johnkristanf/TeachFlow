@@ -2,19 +2,17 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { PrimaryButton } from '../ui/primary-button'
-import { BuildWithAIRubric } from '@/types/rubrics'
-import { Button } from '@/components/ui/button' // You can use your own button component
-import { Trash2Icon } from 'lucide-react'
 import CrtiterionItem from './crtiterion-field'
+import { Rubric } from '@/types/rubrics'
 
 const EditableAIRubricForm = ({
     data,
     onSubmit,
 }: {
-    data: BuildWithAIRubric
-    onSubmit: (data: BuildWithAIRubric) => void
+    data: Rubric
+    onSubmit: (data: Rubric) => void
 }) => {
-    const { control, register, handleSubmit } = useForm<BuildWithAIRubric>({
+    const { control, register, handleSubmit } = useForm<Rubric>({
         defaultValues: data,
     })
 
