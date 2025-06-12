@@ -2,11 +2,12 @@
 
 import * as React from 'react'
 import {
-    Frame,
+    BookOpenCheck,
     LifeBuoy,
-    Map,
-    PieChart,
+    PhoneCall,
+    ScrollText,
     Send,
+    Table,
 } from 'lucide-react'
 
 import { NavProjects } from '@/components/nav-projects'
@@ -27,32 +28,32 @@ const data = {
     user: {
         name: 'shadcn',
         email: 'm@example.com',
-        avatar: '/avatars/shadcn.jpg',
+        avatar: '/teachflow-logo.png',
     },
 
     core_projects: [
         {
             name: 'Essays',
             url: '/essays',
-            icon: Frame,
+            icon: ScrollText,
         },
         {
             name: 'Rubrics',
             url: '/rubrics',
-            icon: PieChart,
+            icon: Table,
         },
         {
-            name: 'PPT Generation',
-            url: '/ppt-generation',
-            icon: Map,
+            name: 'DLP Generator',
+            url: '/dlp-generator',
+            icon: BookOpenCheck,
         },
     ],
 
     navSecondary: [
         {
-            title: 'Support',
-            url: '/support',
-            icon: LifeBuoy,
+            title: 'Contact Us',
+            url: '/contact-us',
+            icon: PhoneCall,
         },
         {
             title: 'Feedback',
@@ -77,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     height={30}
                                     className="rounded-full"
                                 />
-                                <div className="grid flex-1 text-left text-sm leading-tight">
+                                <div className="grid flex-1 text-left text-sm leading-tight text-white">
                                     <span className="truncate font-medium">TeachFlow</span>
                                     <span className="truncate text-xs">Enterprise</span>
                                 </div>
