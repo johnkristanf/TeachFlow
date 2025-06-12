@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { PrimaryButton } from '../ui/primary-button'
 import { Rubric } from '@/types/rubrics'
@@ -16,11 +16,23 @@ import {
     DialogClose,
 } from '@/components/ui/dialog'
 
-import { Button } from '@/components/ui/button'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { essay_categories, grade, intensities, languages } from '@/constants/rubrics'
+import { SkeletonLoader } from '../skeleton-loading'
+import { Dispatch, SetStateAction } from 'react'
 
-const EditRubric = ({ data, onSubmit }: { data: Rubric; onSubmit: (data: Rubric) => void }) => {
+const EditRubric = ({
+    data,
+    onSubmit,
+    isPending,
+    openDialog,
+    setOpenDialog,
+}: {
+    data: Rubric
+    onSubmit: (data: Rubric) => void
+    isPending: boolean
+    openDialog: boolean
+    setOpenDialog: Dispatch<SetStateAction<boolean>>
+}) => {
     const { control, register, handleSubmit } = useForm<Rubric>({
         defaultValues: data,
     })
@@ -35,188 +47,170 @@ const EditRubric = ({ data, onSubmit }: { data: Rubric; onSubmit: (data: Rubric)
     })
 
     return (
-        <Dialog>
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger asChild>
-                <PrimaryButton type="button" variant="solid" color="blue" size="sm">
+                <PrimaryButton variant="solid" color="blue" size="sm">
                     Edit Rubric
                 </PrimaryButton>
             </DialogTrigger>
 
             <DialogContent className="max-h-[600px] w-full md:max-w-4xl overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>Preview and Edit Rubric</DialogTitle>
-                </DialogHeader>
+                {isPending ? (
+                    <SkeletonLoader msg="Editing rubric..." />
+                ) : (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Preview and Edit Rubric</DialogTitle>
+                        </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div>
-                        <label className="font-semibold text-sm">Rubric Name</label>
-                        <Input {...register('name')} />
-                    </div>
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                            <div>
+                                <label className="font-semibold text-sm">Rubric Name</label>
+                                <Input {...register('name')} />
+                            </div>
 
-                    {/* Category */}
-                    <div>
-                        <label className="font-semibold text-sm block mb-2">Category</label>
-                        <Controller
-                            control={control}
-                            name="category"
-                            render={({ field }) => (
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                    className="flex flex-wrap gap-2"
-                                >
-                                    {essay_categories.map((cat) => (
-                                        <div key={cat}>
-                                            <RadioGroupItem
-                                                value={cat}
-                                                id={`cat-${cat}`}
-                                                className="peer sr-only"
+                            {/* Category */}
+                            <div>
+                                <label className="block font-medium mb-1">Essay Category *</label>
+                                <div className="flex gap-2 flex-wrap">
+                                    {essay_categories.map((categ) => (
+                                        <label key={categ} className="cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                value={categ}
+                                                {...register('category', {
+                                                    required: 'Category is required',
+                                                })}
+                                                className="peer hidden"
                                             />
-                                            <label
-                                                htmlFor={`cat-${cat}`}
-                                                className="peer-checked:bg-blue-500 peer-checked:text-white px-4 py-2 rounded-md border border-blue-500 text-blue-600 text-sm font-medium cursor-pointer transition-colors"
-                                            >
-                                                {cat}
-                                            </label>
-                                        </div>
+                                            <div className="px-3 py-1 rounded-md border border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 transition">
+                                                {categ}
+                                            </div>
+                                        </label>
                                     ))}
-                                </RadioGroup>
-                            )}
-                        />
-                    </div>
-
-                    {/* Grade */}
-                    <div>
-                        <label className="font-semibold text-sm block mb-2">Grade Level</label>
-                        <Controller
-                            control={control}
-                            name="grade"
-                            render={({ field }) => (
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                    className="flex flex-wrap gap-2"
-                                >
+                                </div>
+                            </div>
+                            {/* Grade Level */}
+                            <div>
+                                <label className="block font-medium mb-1">Grade Level</label>
+                                <div className="flex gap-2 flex-wrap">
                                     {grade.map((level) => (
-                                        <div key={level}>
-                                            <RadioGroupItem
+                                        <label key={level} className="cursor-pointer">
+                                            <input
+                                                type="radio"
                                                 value={level}
-                                                id={`grade-${level}`}
-                                                className="peer sr-only"
+                                                {...register('grade', {
+                                                    required: 'Grade is required',
+                                                })}
+                                                className="peer hidden"
                                             />
-                                            <label
-                                                htmlFor={`grade-${level}`}
-                                                className="peer-checked:bg-blue-500 peer-checked:text-white px-4 py-2 rounded-md border border-blue-500 text-blue-600 text-sm font-medium cursor-pointer transition-colors"
-                                            >
+                                            <div className="px-3 py-1 rounded-md border border-blue-600  peer-checked:bg-blue-600  peer-checked:text-white peer-checked:border-blue-600 transition">
                                                 {level}
-                                            </label>
-                                        </div>
+                                            </div>
+                                        </label>
                                     ))}
-                                </RadioGroup>
-                            )}
-                        />
-                    </div>
+                                </div>
+                            </div>
 
-                    {/* Intensity */}
-                    <div>
-                        <label className="font-semibold text-sm block mb-2">Intensity</label>
-                        <Controller
-                            control={control}
-                            name="intensity"
-                            render={({ field }) => (
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                    className="flex flex-wrap gap-2"
-                                >
+                            {/* Grading Intensity */}
+                            <div>
+                                <label className="block font-medium mb-1">
+                                    Grading Intensity *
+                                </label>
+                                <div className="flex gap-2 flex-wrap">
                                     {intensities.map(({ label, icon }) => (
-                                        <div key={label}>
-                                            <RadioGroupItem
+                                        <label key={label} className="cursor-pointer">
+                                            <input
+                                                type="radio"
                                                 value={label}
-                                                id={`intensity-${label}`}
-                                                className="peer sr-only"
+                                                {...register('intensity', {
+                                                    required: 'Intensity is required',
+                                                })}
+                                                className="peer hidden"
                                             />
-                                            <label
-                                                htmlFor={`intensity-${label}`}
-                                                className="peer-checked:bg-blue-500 peer-checked:text-white px-4 py-2 rounded-md border border-blue-500 text-blue-600 text-sm font-medium cursor-pointer transition-colors flex items-center gap-1"
+                                            <div
+                                                className={`px-3 py-1 rounded-md border flex items-center gap-2
+                                                border-blue-600 text-gray-700
+                                                peer-checked:text-white 
+                                                peer-checked:border-blue-600
+                                                peer-checked:bg-blue-600
+                                                transition`}
                                             >
-                                                <span>{icon}</span> {label}
-                                            </label>
-                                        </div>
+                                                <span>{icon}</span>
+                                                {label}
+                                            </div>
+                                        </label>
                                     ))}
-                                </RadioGroup>
-                            )}
-                        />
-                    </div>
+                                </div>
+                            </div>
 
-                    {/* Language */}
-                    <div>
-                        <label className="font-semibold text-sm block mb-2">Language</label>
-                        <Controller
-                            control={control}
-                            name="language"
-                            render={({ field }) => (
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                    className="flex flex-wrap gap-2"
-                                >
+                            {/* Language */}
+                            <div>
+                                <label className="block font-medium mb-1">Language *</label>
+                                <div className="flex gap-2 flex-wrap">
                                     {languages.map((lang) => (
-                                        <div key={lang}>
-                                            <RadioGroupItem
+                                        <label key={lang} className="cursor-pointer">
+                                            <input
+                                                type="radio"
                                                 value={lang}
-                                                id={`lang-${lang}`}
-                                                className="peer sr-only"
+                                                {...register('language', {
+                                                    required: 'Language is required',
+                                                })}
+                                                className="peer hidden"
                                             />
-                                            <label
-                                                htmlFor={`lang-${lang}`}
-                                                className="peer-checked:bg-blue-500 peer-checked:text-white px-4 py-2 rounded-md border border-blue-500 text-blue-600 text-sm font-medium cursor-pointer transition-colors"
-                                            >
+                                            <div className="px-3 py-1 rounded-md border border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 transition">
                                                 {lang}
-                                            </label>
-                                        </div>
+                                            </div>
+                                        </label>
                                     ))}
-                                </RadioGroup>
-                            )}
-                        />
-                    </div>
+                                </div>
+                            </div>
 
-                    {/* Criteria Items */}
-                    {criteriaFields.map((criterion, index) => (
-                        <CrtiterionItem
-                            key={criterion.id}
-                            index={index}
-                            control={control}
-                            register={register}
-                            remove={removeCriterion}
-                        />
-                    ))}
+                            {/* Criteria Items */}
+                            {criteriaFields.map((criterion, index) => (
+                                <CrtiterionItem
+                                    key={criterion.id}
+                                    index={index}
+                                    control={control}
+                                    register={register}
+                                    remove={removeCriterion}
+                                />
+                            ))}
 
-                    <div>
-                        <h1
-                            onClick={() =>
-                                appendCriterion({
-                                    title: '',
-                                    levels: [{ label: 'Excellent', score: 5, description: '' }],
-                                })
-                            }
-                            className="text-blue-600 text-sm font-medium hover:underline hover:cursor-pointer"
-                        >
-                            + Add Criterion
-                        </h1>
-                    </div>
+                            <div>
+                                <h1
+                                    onClick={() =>
+                                        appendCriterion({
+                                            title: '',
+                                            levels: [
+                                                { label: 'Excellent', score: 5, description: '' },
+                                            ],
+                                        })
+                                    }
+                                    className="text-blue-600 text-sm font-medium hover:underline hover:cursor-pointer"
+                                >
+                                    + Add Criterion
+                                </h1>
+                            </div>
 
-                    <DialogFooter className="pt-4">
-                        <DialogClose>
-                            <PrimaryButton type="button" color="black" variant="solid" size="md">
-                                Cancel
-                            </PrimaryButton>
-                        </DialogClose>
-                        <PrimaryButton type="submit" color="blue" variant="solid" size="md">
-                            Save Changes
-                        </PrimaryButton>
-                    </DialogFooter>
-                </form>
+                            <DialogFooter className="pt-4">
+                                <DialogClose>
+                                    <PrimaryButton
+                                        type="button"
+                                        color="black"
+                                        variant="solid"
+                                        size="md"
+                                    >
+                                        Cancel
+                                    </PrimaryButton>
+                                </DialogClose>
+                                <PrimaryButton type="submit" color="blue" variant="solid" size="md">
+                                    Save Changes
+                                </PrimaryButton>
+                            </DialogFooter>
+                        </form>
+                    </>
+                )}
             </DialogContent>
         </Dialog>
     )
