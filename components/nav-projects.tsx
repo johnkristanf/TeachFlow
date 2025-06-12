@@ -6,6 +6,7 @@ import { type LucideIcon } from 'lucide-react'
 
 import {
     SidebarGroup,
+    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -24,6 +25,8 @@ export function NavProjects({
 
     return (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel className='text-white'>Projects</SidebarGroupLabel>
+
             <SidebarMenu>
                 {projects.map((item) => {
                     const isActive = pathname === item.url

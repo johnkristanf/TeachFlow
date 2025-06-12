@@ -7,6 +7,7 @@ import { type LucideIcon } from 'lucide-react'
 import {
     SidebarGroup,
     SidebarGroupContent,
+    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -26,6 +27,8 @@ export function NavSecondary({
 
     return (
         <SidebarGroup {...props}>
+            <SidebarGroupLabel className="text-white">Customer Support</SidebarGroupLabel>
+
             <SidebarGroupContent>
                 <SidebarMenu>
                     {items.map((item) => {
