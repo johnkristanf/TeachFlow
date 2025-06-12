@@ -43,14 +43,13 @@ const BuildWithAI = () => {
             queryClient.invalidateQueries({ queryKey: ['rubrics'] })
             toast.success('Rubric Saved Successfully!')
 
-            setTimeout(() => {
-                setOpenDialog(false)
-                setBuildWithAIResponses(undefined)
-            }, 1000)
+            setOpenDialog(false)
+            setBuildWithAIResponses(undefined)
         },
 
         onError: (err) => {
             console.error('Error saving rubric:', err)
+            toast.error('Failed build rubric, please try again')
         },
     })
 
@@ -67,13 +66,6 @@ const BuildWithAI = () => {
                 </PrimaryButton>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[1000px] max-h-[600px] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>Rubric Settings</DialogTitle>
-                    <DialogDescription>
-                        Set the grading options and click save when you're done.
-                    </DialogDescription>
-                </DialogHeader>
-
                 {mutation.isPending ? (
                     <SkeletonLoader msg="Saving your rubric..." />
                 ) : buildWithAIResponses ? (
@@ -81,8 +73,6 @@ const BuildWithAI = () => {
                 ) : (
                     <BuildWithAIForm setBuildWithAIResponses={setBuildWithAIResponses} />
                 )}
-
-
             </DialogContent>
         </Dialog>
     )

@@ -74,14 +74,7 @@ export default function EssayPage() {
                         </PrimaryButton>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[1000px] max-h-[600px] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>Start Grading</DialogTitle>
-                            <DialogDescription>
-                                Please select the assessment attributes to guide the automated
-                                evaluation. The grading process will proceed based on the criteria
-                                you define.
-                            </DialogDescription>
-                        </DialogHeader>
+                       
 
                         <EssayGradingForm onCloseDialog={() => setOpenDialog(false)} />
                     </DialogContent>
