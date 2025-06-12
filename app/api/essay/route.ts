@@ -3,9 +3,9 @@ import { getEssays } from '@/lib/queries/essays/get'
 import { createEssay } from '@/lib/queries/essays/post'
 import { publishToQueue } from '@/lib/rabbitmq/publisher'
 import { Essay } from '@/types/essay'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     const formData = await req.formData()
 
     const files = formData.getAll('files')
