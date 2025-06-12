@@ -19,6 +19,7 @@ export async function getRubricsWithDetails(source: string | null) {
             created_by: rubrics.created_by,
         })
         .from(rubrics)
+        .orderBy(desc(rubrics.createdAt)) // 🆕 Sort by latest
 
     const rubricList = source
         ? await baseQuery.where(eq(rubrics.created_by, source))
