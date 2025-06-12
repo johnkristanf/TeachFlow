@@ -1,10 +1,14 @@
 'use client'
 
+import DeleteRubric from '@/components/rubrics/delete-rubric'
 import EditRubric from '@/components/rubrics/edit-rubric'
 import { Badge } from '@/components/ui/badge'
 import { PrimaryButton } from '@/components/ui/primary-button'
 import { Rubric } from '@/types/rubrics'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 export const columns: ColumnDef<Rubric>[] = [
     {
@@ -47,18 +51,105 @@ export const columns: ColumnDef<Rubric>[] = [
         header: 'Actions',
         cell: ({ row }) => {
             const rubric = row.original
+            const queryClient = useQueryClient()
+            const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
+            const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false)
 
-            const handlePreview = () => {
-                
+            const editRubricMutation = useMutation({
+                mutationFn: async (data: Rubric) => {
+                    const res = await fetch(`/api/rubrics/${data.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    })
+
+                    if (!res.ok) {
+                        const error = await res.json()
+                        throw new Error(error?.message || 'Failed to create rubric')
+                    }
+
+                    return res.json()
+                },
+
+                onSuccess: (response) => {
+                    console.log('Rubric saved:', response)
+                    queryClient.invalidateQueries({ queryKey: ['rubrics'] })
+                    toast.success('Rubric Edited Successfully!')
+
+                    setTimeout(() => {
+                        setOpenEditDialog(false)
+                    }, 500)
+                },
+
+                onError: (err) => {
+                    console.error('Error editing rubric:', err)
+                    toast.error('Failed to edit rubric, please try again.')
+
+                    setTimeout(() => {
+                        setOpenEditDialog(false)
+                    }, 500)
+                },
+            })
+
+            const deleteRubricMutation = useMutation({
+                mutationFn: async (rubricId: number) => {
+                    const res = await fetch(`/api/rubrics/${rubricId}`, {
+                        method: 'DELETE',
+                    })
+
+                    if (!res.ok) {
+                        const error = await res.json()
+                        throw new Error(error?.message || 'Failed to delete rubric')
+                    }
+
+                    return res.json()
+                },
+
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: ['rubrics'] })
+                    toast.success('Rubric deleted successfully!')
+
+                    setTimeout(() => {
+                        setOpenDeleteDialog(false)
+                    }, 500)
+                },
+
+                onError: (err: any) => {
+                    console.error('Error deleting rubric:', err)
+                    toast.error('Failed to delete rubric, please try again.')
+
+                    setTimeout(() => {
+                        setOpenDeleteDialog(false)
+                    }, 500)
+                },
+            })
+
+            const handleEditRubric = (data: Rubric) => {
+                console.log('Edit rubric data: ', data)
+                editRubricMutation.mutate(data)
+            }
+
+            const handleDeleteRubric = () => {
+                console.log('sdfsdf')
+                deleteRubricMutation.mutate(rubric.id)
             }
 
             return (
                 <div className="flex items-center gap-3">
-                    <EditRubric data={rubric} onSubmit={handlePreview} />
+                    <EditRubric
+                        data={rubric}
+                        onSubmit={handleEditRubric}
+                        isPending={editRubricMutation.isPending}
+                        openDialog={openEditDialog}
+                        setOpenDialog={setOpenEditDialog}
+                    />
 
-                    <PrimaryButton color="red" variant="solid" onClick={handlePreview}>
-                        Delete
-                    </PrimaryButton>
+                    <DeleteRubric
+                        onDelete={handleDeleteRubric}
+                        isPending={deleteRubricMutation.isPending}
+                        openDialog={openDeleteDialog}
+                        setOpenDialog={setOpenDeleteDialog}
+                    />
                 </div>
             )
         },
