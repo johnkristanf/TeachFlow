@@ -1,20 +1,22 @@
-import { Criterion } from '@/types/rubrics'
+import { Criteria, SelectedRubric } from '@/types/rubrics'
 import { create } from 'zustand'
 
 interface RubricStore {
-    rubric: {
-        name: string;
-        created_by: string;
-    };
-    criteria: Criterion[];
-    setCriteria: (criteria: Criterion[]) => void;
-    setRubric: (rubric: { name: string; created_by: string }) => void;
-    resetCriteria: () => void;
+    rubric: SelectedRubric
+    criteria: Criteria[]
+    setCriteria: (criteria: Criteria[]) => void
+    setRubric: (rubric: SelectedRubric) => void
+    resetCriteria: () => void
 }
 
 export const useRubricStore = create<RubricStore>((set) => ({
     rubric: {
+        id: 0,
         name: '',
+        category: '',
+        grade: '',
+        intensity: '',
+        language: '',
         created_by: '',
     },
     criteria: [],
@@ -25,7 +27,12 @@ export const useRubricStore = create<RubricStore>((set) => ({
         set({
             criteria: [],
             rubric: {
+                id: 0,
                 name: '',
+                category: '',
+                grade: '',
+                intensity: '',
+                language: '',
                 created_by: '',
             },
         }),
