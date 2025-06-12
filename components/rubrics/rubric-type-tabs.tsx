@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Rubric, RubricWithDetails } from '@/types/rubrics'
+import { Rubric } from '@/types/rubrics'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { DataTable } from '../data-table'
@@ -18,7 +18,7 @@ const RubricTypeTabs = () => {
         queryFn: async () => {
             const res = await fetch(`/api/rubrics?source=${selectedTab}`)
             if (!res.ok) throw new Error('Failed to fetch rubrics')
-            const data: RubricWithDetails[] = await res.json()
+            const data: Rubric[] = await res.json()
             return data
         },
         enabled: !!selectedTab, // only fetch when tab is set

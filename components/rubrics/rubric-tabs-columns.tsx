@@ -3,10 +3,10 @@
 import { Badge } from '@/components/ui/badge'
 import { PrimaryButton } from '@/components/ui/primary-button'
 import { useRubricStore } from '@/store/useStoreRubric'
-import { Rubric, RubricWithDetails } from '@/types/rubrics'
+import { Rubric } from '@/types/rubrics'
 import { ColumnDef } from '@tanstack/react-table'
 
-export const rubric_tabs_columns: ColumnDef<RubricWithDetails>[] = [
+export const rubric_tabs_columns: ColumnDef<Rubric>[] = [
     {
         accessorKey: 'name',
         header: 'Name',
@@ -32,17 +32,29 @@ export const rubric_tabs_columns: ColumnDef<RubricWithDetails>[] = [
             const setCriteria = useRubricStore((state) => state.setCriteria)
             const setRubric = useRubricStore((state) => state.setRubric)
 
+            const isSelectedRubric = useRubricStore((state) => state.rubric.id) == rubric.id
+
             const handleSelectRubric = () => {
                 setCriteria(rubric.criteria)
                 setRubric({
+                    id: rubric.id,
                     name: rubric.name,
-                    created_by: rubric.created_by
+                    category: rubric.category,
+                    grade: rubric.grade,
+                    intensity: rubric.intensity,
+                    language: rubric.language,
+                    created_by: rubric.created_by,
                 })
             }
 
             return (
-                <PrimaryButton color="blue" variant="outline" onClick={handleSelectRubric}>
-                    Select
+                <PrimaryButton
+                    color="blue"
+                    variant="outline"
+                    onClick={handleSelectRubric}
+                    disabled={isSelectedRubric}
+                >
+                    {isSelectedRubric ? 'Selected' : 'Select'}
                 </PrimaryButton>
             )
         },

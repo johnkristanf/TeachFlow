@@ -19,8 +19,10 @@ import {
 import RubricTypeTabs from '../rubrics/rubric-type-tabs'
 import { useRubricStore } from '@/store/useStoreRubric'
 import { convertBase64ToFile, formatFileSize } from '@/lib/utils'
-import { pythonServerBaseURLV1 } from '@/api/base'
-import { Criterion } from '@/types/rubrics'
+import { Criteria } from '@/types/rubrics'
+import { SkeletonLoader } from '../skeleton-loading'
+import { FileIcon, FileUp } from 'lucide-react'
+import { DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
 
 type EssayGradingFormProps = {
     onCloseDialog?: () => void
@@ -34,7 +36,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
     const queryClient = useQueryClient()
 
     const [formData, setFormData] = useState({
-        rubric_criteria: [] as Criterion[],
+        rubric_criteria: [] as Criteria[],
         gradingMethod: 'files',
         files: [] as File[],
         capturedImages: [] as string[], // Base64 images from webcam
@@ -175,10 +177,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
             console.log('Essay graded:', response)
             queryClient.invalidateQueries({ queryKey: ['essays'] })
             toast.success('Essay Submitted for Evaluation!')
-
-            setTimeout(() => {
-                if (onCloseDialog) onCloseDialog()
-            }, 1500)
+            if (onCloseDialog) onCloseDialog()
         },
 
         onError: (err) => {
@@ -236,360 +235,438 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
     }, [])
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-3 bg-gray-100 p-3 rounded-md">
-                <div className="flex items-center justify-between">
-                    <label className="text-base font-medium">Rubric</label>
+        <div>
+            {mutation.isPending ? (
+                <SkeletonLoader msg="Submitting Essay for Evaluation..." />
+            ) : (
+                <>
+                    <DialogHeader>
+                        <DialogTitle>Start Grading</DialogTitle>
+                        <DialogDescription>
+                            Please select the assessment attributes to guide the automated
+                            evaluation. The grading process will proceed based on the criteria you
+                            define.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-3 bg-gray-100 p-3 rounded-md">
+                            <div className="flex items-center justify-between">
+                                <label className="text-base font-medium">Rubric</label>
 
-                    <Drawer direction="right">
-                        <DrawerTrigger asChild>
-                            <PrimaryButton type="button" variant="solid" color="blue" size="sm">
-                                Select Essay Rubric
-                            </PrimaryButton>
-                        </DrawerTrigger>
-                        <DrawerContent>
-                            <DrawerHeader>
-                                <DrawerTitle>Select Rubric</DrawerTitle>
-                            </DrawerHeader>
+                                <Drawer direction="right">
+                                    <DrawerTrigger asChild>
+                                        <PrimaryButton
+                                            type="button"
+                                            variant="solid"
+                                            color="blue"
+                                            size="sm"
+                                        >
+                                            Select Essay Rubric
+                                        </PrimaryButton>
+                                    </DrawerTrigger>
+                                    <DrawerContent>
+                                        <DrawerHeader>
+                                            <DrawerTitle>Select Rubric</DrawerTitle>
+                                        </DrawerHeader>
 
-                            {/* TABS */}
-                            <RubricTypeTabs />
-                        </DrawerContent>
-                    </Drawer>
-                </div>
-
-                <div className="flex justify-between p-4 bg-white rounded-lg">
-                    {selectedRubricCriteria && selectedRubricCriteria.length > 0 ? (
-                        <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
-                                📄
+                                        {/* TABS */}
+                                        <RubricTypeTabs />
+                                    </DrawerContent>
+                                </Drawer>
                             </div>
-                            <p className="font-medium">{selectedRubric.name}</p>
+
+                            <div className="flex justify-between items-center p-4 bg-white rounded-lg">
+                                {selectedRubricCriteria && selectedRubricCriteria.length > 0 ? (
+                                    <div className="flex flex-col">
+                                        <p className="text-xl font-medium mb-1">
+                                            {selectedRubric.name}
+                                        </p>
+                                        <p className="text-xs">
+                                            Category:{' '}
+                                            <span className="text-blue-500 font-semibold">
+                                                {' '}
+                                                {selectedRubric.category}
+                                            </span>
+                                        </p>
+                                        <p className="text-xs">
+                                            Grade Level:{' '}
+                                            <span className="text-blue-500 font-semibold">
+                                                {' '}
+                                                {selectedRubric.grade}
+                                            </span>
+                                        </p>
+
+                                        <p className="text-xs">
+                                            Grade Intensity:{' '}
+                                            <span className="text-blue-500 font-semibold">
+                                                {' '}
+                                                {selectedRubric.intensity}
+                                            </span>
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <h1 className="text-blue-600 font-semibold">
+                                        No Essay Rubric Selected
+                                    </h1>
+                                )}
+
+                                {selectedRubric?.created_by ? (
+                                    <div className="flex flex-col">
+                                        <p className="text-sm">
+                                            Created by{' '}
+                                            <span className="font-semibold text-blue-500">
+                                                {selectedRubric.created_by === 'teachflow_rubrics'
+                                                    ? 'TeachFlow'
+                                                    : 'Me'}
+                                            </span>
+                                        </p>
+
+                                        <p className="text-xs">
+                                            Language:{' '}
+                                            <span className="text-blue-500 font-semibold">
+                                                {' '}
+                                                {selectedRubric.language}
+                                            </span>
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm">&nbsp;</p> // renders empty line to keep layout consistent
+                                )}
+                            </div>
                         </div>
-                    ) : (
-                        <h1 className="text-blue-600 font-semibold">No Essay Rubric Selected</h1>
-                    )}
 
-                    {selectedRubric?.created_by ? (
-                        <p className="text-sm">
-                            Created by{' '}
-                            <span className="font-semibold">
-                                {selectedRubric.created_by === 'teachflow_rubrics'
-                                    ? 'TeachFlow'
-                                    : 'Me'}
-                            </span>
-                        </p>
-                    ) : (
-                        <p className="text-sm">&nbsp;</p> // renders empty line to keep layout consistent
-                    )}
-                </div>
-            </div>
+                        {/* Upload Method */}
 
-            {/* Upload Method */}
+                        <div className="space-y-3 bg-gray-100 p-3 rounded-md">
+                            <label className="text-base font-medium">
+                                Upload essay(s) <span className="text-red-500">*</span>
+                            </label>
 
-            <div className="space-y-3 bg-gray-100 p-3 rounded-md">
-                <label className="text-base font-medium">
-                    Upload essay(s) <span className="text-red-500">*</span>
-                </label>
+                            <RadioGroup
+                                value={formData.gradingMethod}
+                                onValueChange={(value) => {
+                                    setFormData((prev) => ({ ...prev, gradingMethod: value }))
+                                    // Stop webcam when switching away from it
+                                    if (value !== 'webcam') {
+                                        stopWebcam()
+                                    }
+                                }}
+                                className="flex space-x-6"
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="files" id="files" />
+                                    <label htmlFor="files">Select files</label>
+                                </div>
 
-                <RadioGroup
-                    value={formData.gradingMethod}
-                    onValueChange={(value) => {
-                        setFormData((prev) => ({ ...prev, gradingMethod: value }))
-                        // Stop webcam when switching away from it
-                        if (value !== 'webcam') {
-                            stopWebcam()
-                        }
-                    }}
-                    className="flex space-x-6"
-                >
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="files" id="files" />
-                        <label htmlFor="files">Select files</label>
-                    </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="webcam" id="webcam" />
+                                    <label htmlFor="webcam">Webcam</label>
+                                </div>
+                            </RadioGroup>
 
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="webcam" id="webcam" />
-                        <label htmlFor="webcam">Webcam</label>
-                    </div>
-                </RadioGroup>
+                            {/* File Upload Area */}
+                            {formData.gradingMethod === 'files' && (
+                                <div className="space-y-4">
+                                    {/* Upload Drop Zone - Show when no files or allow adding more */}
+                                    <div
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={handleDropFile}
+                                        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:cursor-pointer"
+                                        onClick={triggerFileInput}
+                                    >
+                                        <div className="space-y-4">
+                                            {/* Selected Files Display */}
+                                            {formData.files.length > 0 ? (
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <PrimaryButton
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setFormData((prev) => ({
+                                                                        ...prev,
+                                                                        files: [],
+                                                                    }))
+                                                                }
+                                                            >
+                                                                Cancel
+                                                            </PrimaryButton>
+                                                        </div>
+                                                        <div className="flex items-center space-x-4">
+                                                            <span className="text-sm text-gray-600">
+                                                                {formData.files.length} file
+                                                                {formData.files.length !== 1
+                                                                    ? 's'
+                                                                    : ''}{' '}
+                                                                selected
+                                                            </span>
+                                                            <h1
+                                                                className=" text-blue-600 hover:underline hover:cursor-pointer"
+                                                                onClick={triggerFileInput}
+                                                            >
+                                                                <span>+</span>
+                                                                <span>Add more</span>
+                                                            </h1>
+                                                        </div>
+                                                    </div>
 
-                {/* File Upload Area */}
-                {formData.gradingMethod === 'files' && (
-                    <div className="space-y-4">
-                        {/* Upload Drop Zone - Show when no files or allow adding more */}
-                        <div
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={handleDropFile}
-                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
-                        >
-                            <div className="space-y-4">
-                                {/* Selected Files Display */}
-                                {formData.files.length > 0 ? (
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-2">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                        {formData.files.map((file, index) => {
+                                                            const isImage =
+                                                                file.type.startsWith('image/')
+                                                            const previewUrl = isImage
+                                                                ? URL.createObjectURL(file)
+                                                                : null
+
+                                                            return (
+                                                                <div
+                                                                    key={`${file.name}-${index}`}
+                                                                    className="relative"
+                                                                >
+                                                                    <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                removeFile(index)
+                                                                            }
+                                                                            className="absolute -top-2 -right-2 w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm hover:bg-gray-800 z-10"
+                                                                        >
+                                                                            ×
+                                                                        </button>
+                                                                        <div className="flex flex-col items-center space-y-2">
+                                                                            {/* UPLOADED FILE PREVIEW */}
+                                                                            <div className="w-full h-40 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden">
+                                                                                {isImage ? (
+                                                                                    <img
+                                                                                        src={
+                                                                                            previewUrl!
+                                                                                        }
+                                                                                        alt={
+                                                                                            file.name
+                                                                                        }
+                                                                                        className="object-contain w-full h-full"
+                                                                                        onLoad={() =>
+                                                                                            URL.revokeObjectURL(
+                                                                                                previewUrl!
+                                                                                            )
+                                                                                        }
+                                                                                    />
+                                                                                ) : (
+                                                                                    <div className="w-8 h-10 bg-gray-200 rounded flex items-center justify-center text-2xl">
+                                                                                        📄
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="text-center mt-2">
+                                                                                <p
+                                                                                    className="text-sm font-medium text-gray-900 truncate max-w-[150px]"
+                                                                                    title={
+                                                                                        file.name
+                                                                                    }
+                                                                                >
+                                                                                    {file.name}
+                                                                                </p>
+                                                                                <p className="text-xs text-gray-500">
+                                                                                    {formatFileSize(
+                                                                                        file.size
+                                                                                    )}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <div className="flex flex-col justify-center items-center">
+                                                        <FileUp />
+                                                        <p className="text-gray-600">
+                                                            Drop files here,{' '}
+                                                            <button
+                                                                type="button"
+                                                                onClick={triggerFileInput}
+                                                                className="text-blue-600 underline hover:text-blue-800"
+                                                            >
+                                                                browse files
+                                                            </button>
+                                                        </p>
+                                                    </div>
+
+                                                    {/* <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                                                    <div
+                                                        className="flex flex-col items-center space-y-1 cursor-pointer hover:opacity-75"
+                                                        onClick={triggerFileInput}
+                                                    >
+                                                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                            💻
+                                                        </div>
+                                                        <span className="text-xs text-gray-600">
+                                                            My Device
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-col items-center space-y-1 cursor-pointer hover:opacity-75">
+                                                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                                            🔺
+                                                        </div>
+                                                        <span className="text-xs text-gray-600">
+                                                            Google Drive
+                                                        </span>
+                                                    </div>
+                                                </div> */}
+                                                </div>
+                                            )}
+
+                                            {/* Hidden file input */}
+                                            <input
+                                                id="hidden-file-input"
+                                                type="file"
+                                                multiple
+                                                accept="image/*" // temporarily only accept image, upgrade later for scalability
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Webcam Area */}
+                            {formData.gradingMethod === 'webcam' && (
+                                <div className="space-y-4">
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                                        <div className="text-center space-y-4">
+                                            {!webcamActive ? (
+                                                <div>
+                                                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                                        📷
+                                                    </div>
+                                                    <p className="text-gray-600 mb-4">
+                                                        Start your webcam to capture essay images
+                                                        continuously
+                                                    </p>
+                                                    <PrimaryButton
+                                                        type="button"
+                                                        onClick={startWebcam}
+                                                        color="blue"
+                                                    >
+                                                        Start Webcam
+                                                    </PrimaryButton>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    {/* Video Display */}
+                                                    <div
+                                                        className="relative mx-auto"
+                                                        style={{ maxWidth: '640px' }}
+                                                    >
+                                                        <video
+                                                            ref={videoRef}
+                                                            autoPlay
+                                                            muted
+                                                            playsInline
+                                                            className="w-full rounded-lg border"
+                                                        />
+                                                        <canvas
+                                                            ref={canvasRef}
+                                                            className="hidden"
+                                                        />
+                                                    </div>
+
+                                                    {/* Controls */}
+                                                    <div className="flex justify-center space-x-4">
+                                                        <PrimaryButton
+                                                            type="button"
+                                                            onClick={captureImage}
+                                                            color="blue"
+                                                        >
+                                                            📸 Capture Now
+                                                        </PrimaryButton>
+
+                                                        <PrimaryButton
+                                                            type="button"
+                                                            onClick={stopWebcam}
+                                                            variant="outline"
+                                                        >
+                                                            Stop Webcam
+                                                        </PrimaryButton>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Captured Images Display */}
+                                    {formData.capturedImages.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-lg font-medium">
+                                                    Captured Images (
+                                                    {formData.capturedImages.length})
+                                                </h3>
                                                 <PrimaryButton
                                                     type="button"
                                                     onClick={() =>
                                                         setFormData((prev) => ({
                                                             ...prev,
-                                                            files: [],
+                                                            capturedImages: [],
                                                         }))
                                                     }
+                                                    variant="outline"
+                                                    color="red"
                                                 >
-                                                    Cancel
+                                                    Clear All
                                                 </PrimaryButton>
                                             </div>
-                                            <div className="flex items-center space-x-4">
-                                                <span className="text-sm text-gray-600">
-                                                    {formData.files.length} file
-                                                    {formData.files.length !== 1 ? 's' : ''}{' '}
-                                                    selected
-                                                </span>
-                                                <h1
-                                                    className=" text-blue-600"
-                                                    onClick={triggerFileInput}
-                                                >
-                                                    <span>+</span>
-                                                    <span>Add more</span>
-                                                </h1>
-                                            </div>
-                                        </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                            {formData.files.map((file, index) => {
-                                                const isImage = file.type.startsWith('image/')
-                                                const previewUrl = isImage
-                                                    ? URL.createObjectURL(file)
-                                                    : null
-
-                                                return (
-                                                    <div
-                                                        key={`${file.name}-${index}`}
-                                                        className="relative"
-                                                    >
-                                                        <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
+                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                                {formData.capturedImages.map((imageData, index) => (
+                                                    <div key={index} className="relative">
+                                                        <div className="bg-gray-100 rounded-lg p-2 border border-gray-200">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => removeFile(index)}
-                                                                className="absolute -top-2 -right-2 w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm hover:bg-gray-800 z-10"
+                                                                onClick={() => removeImage(index)}
+                                                                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 z-10"
                                                             >
                                                                 ×
                                                             </button>
-                                                            <div className="flex flex-col items-center space-y-2">
-                                                                <div className="w-full h-40 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden">
-                                                                    {isImage ? (
-                                                                        <img
-                                                                            src={previewUrl!}
-                                                                            alt={file.name}
-                                                                            className="object-contain w-full h-full"
-                                                                            onLoad={() =>
-                                                                                URL.revokeObjectURL(
-                                                                                    previewUrl!
-                                                                                )
-                                                                            }
-                                                                        />
-                                                                    ) : (
-                                                                        <div className="w-8 h-10 bg-gray-200 rounded flex items-center justify-center text-2xl">
-                                                                            📄
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                                <div className="text-center mt-2">
-                                                                    <p
-                                                                        className="text-sm font-medium text-gray-900 truncate max-w-[150px]"
-                                                                        title={file.name}
-                                                                    >
-                                                                        {file.name}
-                                                                    </p>
-                                                                    <p className="text-xs text-gray-500">
-                                                                        {formatFileSize(file.size)}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
+                                                            <img
+                                                                src={imageData}
+                                                                alt={`Captured ${index + 1}`}
+                                                                className="w-full h-24 object-cover rounded"
+                                                            />
+                                                            <p className="text-xs text-gray-500 text-center mt-1">
+                                                                Image {index + 1}
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <p className="text-gray-600">
-                                            Drop files here,{' '}
-                                            <button
-                                                type="button"
-                                                onClick={triggerFileInput}
-                                                className="text-blue-600 underline hover:text-blue-800"
-                                            >
-                                                browse files
-                                            </button>{' '}
-                                            or import from:
-                                        </p>
-
-                                        <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                                            <div
-                                                className="flex flex-col items-center space-y-1 cursor-pointer hover:opacity-75"
-                                                onClick={triggerFileInput}
-                                            >
-                                                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                    💻
-                                                </div>
-                                                <span className="text-xs text-gray-600">
-                                                    My Device
-                                                </span>
-                                            </div>
-                                            <div className="flex flex-col items-center space-y-1 cursor-pointer hover:opacity-75">
-                                                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                                    🔺
-                                                </div>
-                                                <span className="text-xs text-gray-600">
-                                                    Google Drive
-                                                </span>
+                                                ))}
                                             </div>
                                         </div>
-                                    </div>
-                                )}
-
-                                {/* Hidden file input */}
-                                <input
-                                    id="hidden-file-input"
-                                    type="file"
-                                    multiple
-                                    accept="image/*" // temporarily only accept image, upgrade later for scalability
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-
-                {/* Webcam Area */}
-                {formData.gradingMethod === 'webcam' && (
-                    <div className="space-y-4">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                            <div className="text-center space-y-4">
-                                {!webcamActive ? (
-                                    <div>
-                                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                            📷
-                                        </div>
-                                        <p className="text-gray-600 mb-4">
-                                            Start your webcam to capture essay images continuously
-                                        </p>
-                                        <PrimaryButton
-                                            type="button"
-                                            onClick={startWebcam}
-                                            color="blue"
-                                        >
-                                            Start Webcam
-                                        </PrimaryButton>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {/* Video Display */}
-                                        <div
-                                            className="relative mx-auto"
-                                            style={{ maxWidth: '640px' }}
-                                        >
-                                            <video
-                                                ref={videoRef}
-                                                autoPlay
-                                                muted
-                                                playsInline
-                                                className="w-full rounded-lg border"
-                                            />
-                                            <canvas ref={canvasRef} className="hidden" />
-                                        </div>
-
-                                        {/* Controls */}
-                                        <div className="flex justify-center space-x-4">
-                                            <PrimaryButton
-                                                type="button"
-                                                onClick={captureImage}
-                                                color="blue"
-                                            >
-                                                📸 Capture Now
-                                            </PrimaryButton>
-
-                                            <PrimaryButton
-                                                type="button"
-                                                onClick={stopWebcam}
-                                                variant="outline"
-                                            >
-                                                Stop Webcam
-                                            </PrimaryButton>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Captured Images Display */}
-                        {formData.capturedImages.length > 0 && (
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-medium">
-                                        Captured Images ({formData.capturedImages.length})
-                                    </h3>
-                                    <PrimaryButton
-                                        type="button"
-                                        onClick={() =>
-                                            setFormData((prev) => ({ ...prev, capturedImages: [] }))
-                                        }
-                                        variant="outline"
-                                        color="red"
-                                    >
-                                        Clear All
-                                    </PrimaryButton>
-                                </div>
-
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                    {formData.capturedImages.map((imageData, index) => (
-                                        <div key={index} className="relative">
-                                            <div className="bg-gray-100 rounded-lg p-2 border border-gray-200">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeImage(index)}
-                                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 z-10"
-                                                >
-                                                    ×
-                                                </button>
-                                                <img
-                                                    src={imageData}
-                                                    alt={`Captured ${index + 1}`}
-                                                    className="w-full h-24 object-cover rounded"
-                                                />
-                                                <p className="text-xs text-gray-500 text-center mt-1">
-                                                    Image {index + 1}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            <div className="flex justify-end">
-                <PrimaryButton
-                    type="submit"
-                    variant="solid"
-                    color="blue"
-                    size="md"
-                    disabled={mutation.isPending}
-                    className={
-                        mutation.isPending ? 'bg-gray-500 cursor-not-allowed' : ''
-                    }
-                >
-                    {mutation.isPending ? 'Submitting...' : 'Submit'}
-                </PrimaryButton>
-            </div>
-        </form>
+                        <div className="flex justify-end">
+                            <PrimaryButton
+                                type="submit"
+                                variant="solid"
+                                color="blue"
+                                size="md"
+                                disabled={mutation.isPending}
+                                className={
+                                    mutation.isPending ? 'bg-gray-500 cursor-not-allowed' : ''
+                                }
+                            >
+                                {mutation.isPending ? 'Submitting...' : 'Submit'}
+                            </PrimaryButton>
+                        </div>
+                    </form>
+                </>
+            )}
+        </div>
     )
 }

@@ -25,6 +25,15 @@ export interface Levels {
     description: string
 }
 
+export type SelectedRubric = {
+    id: number
+    name: string
+    category: string
+    grade: string
+    intensity: string
+    language: string
+    created_by: string
+}
 
 export interface BuildWithAIRubricCreate {
     name: string
@@ -41,4 +50,3 @@ export interface BuildWithAIRubricCreate {
     language: 'US English' | 'UK English' | 'AUS English'
     criteria: { title: string }[]
 }
-
