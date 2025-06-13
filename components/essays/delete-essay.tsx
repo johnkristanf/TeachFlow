@@ -28,16 +28,7 @@ function DeleteEssay({
 }) {
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-                <PrimaryButton
-                    color="red"
-                    variant="solid"
-                    disabled={!isGraded}
-                    className={!isGraded ? 'opacity-50 cursor-not-allowed' : ''}
-                >
-                    Delete
-                </PrimaryButton>
-            </DialogTrigger>
+            <DialogTrigger >Delete</DialogTrigger>
             <DialogContent>
                 {isPending ? (
                     <SkeletonLoader msg="Deleting Essay..." />
