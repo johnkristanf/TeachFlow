@@ -62,5 +62,11 @@ export async function GET() {
         return NextResponse.json(essays)
     } catch (error) {
         console.error(`Failed to get essays:`, error)
+        return NextResponse.json(
+            {
+                message: 'Server Error Occured',
+            },
+            { status: 500 }
+        )
     }
 }

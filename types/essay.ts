@@ -1,40 +1,47 @@
-
 export type Essay = {
-  name?: string;              
-  rubricUsed: string;
-  sourceType: string;
-  essayText: string;
-  status: string;
-};
-
+    name?: string
+    rubricUsed: string
+    sourceType: string
+    essayText: string
+    status: string
+}
 
 export interface Evaluation {
-  evaluation_id: string;
-  criterion?: string;
-  matched_label?: string;
-  score?: number;
-  max_score?: number;
-  reason?: string;
-  suggestion?: string;
-  evaluation_created_at?: Date;
+    evaluation_id: string
+    criterion?: string
+    matched_label?: string
+    score?: number
+    max_score?: number
+    reason?: string
+    suggestion?: string
+    evaluation_created_at?: Date
 }
 
 export interface Summary {
-  summary_id: string;
-  total_score?: number;
-  max_total_score?: number;
-  overall_feedback?: string;
+    summary_id: string
+    total_score?: number
+    max_total_score?: number
+    overall_feedback?: string
+}
+
+export interface GradingLog {
+    id: number // Assuming 'id' is serial/integer in essayGradingLogs
+    logged_at: Date
+    failure_type: string
+    error_message: string
+    error_details: Record<string, any> | null // JSONB can be any valid JSON, so Record<string, any> or a more specific type if known
 }
 
 export interface EssayWithEvalSummary {
-  id: string;
-  name: string | null;
-  rubric_used: string;
-  source_type: string;
-  essay_text: string;
-  status: string;
-  created_at: Date;
+    id: string
+    name: string | null
+    rubric_used: string
+    source_type: string
+    essay_text: string
+    status: string
+    created_at: Date
 
-  evaluations: Evaluation[]; // array of evaluations
-  summary?: Summary;         // optional summary object
+    evaluations: Evaluation[] // array of evaluations
+    summary?: Summary // optional summary object
+    grading_logs?: GradingLog[] // optional array of grading logs
 }
