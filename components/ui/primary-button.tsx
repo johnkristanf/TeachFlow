@@ -2,7 +2,7 @@ import React from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-type Color = 'blue' | 'red' | 'black'
+type Color = 'blue' | 'red' | 'black' | 'green'
 type Size = 'sm' | 'md'
 type Variant = 'solid' | 'outline'
 
@@ -22,11 +22,14 @@ const variants: Record<Variant, Record<Color, string>> = {
         blue: 'bg-blue-600 hover:bg-blue-700 text-white',
         red: 'bg-red-600 hover:bg-red-700 text-white',
         black: 'bg-gray-800 hover:bg-gray-900 text-white',
+        green: 'bg-green-600 hover:bg-green-700 text-white',
     },
     outline: {
         black: 'border border-gray-900 text-gray-600 hover:bg-gray-100',
         blue: 'border border-blue-900 text-blue-600 hover:bg-blue-100',
         red: 'border border-red-900 text-red-600 hover:bg-red-100',
+        green: 'border border-green-900 text-green-600 hover:bg-green-100',
+
     },
 }
 

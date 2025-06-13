@@ -23,10 +23,7 @@ export default function EssayPage() {
     const [pollingInterval, setPollingInterval] = useState<false | number>(false)
     const [hasPendingStatus, setHasPendingStatus] = useState<boolean>(false)
 
-    const {
-        data = [],
-        isLoading,
-    } = useQuery<EssayWithEvalSummary[], Error>({
+    const { data = [], isLoading } = useQuery<EssayWithEvalSummary[], Error>({
         queryKey: ['essays'],
         queryFn: async () => {
             const res = await fetch('/api/essay')
@@ -39,6 +36,8 @@ export default function EssayPage() {
     // Timer countdown logic - reset on every fetch/refetch
     useEffect(() => {
         if (!data) return
+
+        console.log('essay 123: ', data)
 
         const hasPending = data.some((essay) => essay.status === 'pending')
 
@@ -59,7 +58,6 @@ export default function EssayPage() {
         } else {
             setHasPendingStatus(false)
         }
-        
     }, [data])
 
     return (
@@ -74,8 +72,6 @@ export default function EssayPage() {
                         </PrimaryButton>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[1000px] max-h-[600px] overflow-y-auto">
-                       
-
                         <EssayGradingForm onCloseDialog={() => setOpenDialog(false)} />
                     </DialogContent>
                 </Dialog>
