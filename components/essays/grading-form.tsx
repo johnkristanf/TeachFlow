@@ -115,6 +115,8 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
     // Start webcam
     const startWebcam = async () => {
+        stopWebcam();
+        
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { width: 640, height: 480 },
