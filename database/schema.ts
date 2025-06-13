@@ -7,6 +7,7 @@ import {
     timestamp,
     integer,
     pgEnum,
+    jsonb,
 } from 'drizzle-orm/pg-core'
 
 // RUBRICS
@@ -52,6 +53,17 @@ export const essay = pgTable('essay', {
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })
 
+// GRADING ERROR LOGS
+export const essayGradingLogs = pgTable('essay_grading_logs', {
+    id: serial('id').primaryKey(),
+    essayId: uuid('essay_id')
+        .references(() => essay.id, { onDelete: 'cascade' })
+        .notNull(),
+    loggedAt: timestamp('logged_at', { mode: 'date' }).defaultNow(),
+    failureType: varchar('failure_type', { length: 50 }).notNull(), // (e.g., 'retry_exhausted', 'permanent_error', 'llm_api_error', 'invalid_rubric')
+    errorMessage: text('error_message').notNull(),
+    errorDetails: jsonb('error_details'), // Potentially including stack traces or full API error responses
+})
 
 // FEEDBACK
 export const performanceEnum = pgEnum('performance_enum', ['fast', 'acceptable', 'slow'])
