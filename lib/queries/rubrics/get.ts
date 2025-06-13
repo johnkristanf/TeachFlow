@@ -1,5 +1,6 @@
 import { db } from '@/database'
 import { criteria, levels, rubrics } from '@/database/schema'
+import { Criteria } from '@/types/rubrics'
 import { desc, eq, inArray } from 'drizzle-orm'
 
 export async function getAllRubrics() {
@@ -54,4 +55,85 @@ export async function getRubricsWithDetails(source: string | null) {
     }))
 
     return rubricsWithDetails
+}
+
+
+
+export async function getRubricCriteria(rubricName: string) {
+    try {
+        const result = await db
+            .select({
+                // Rubric fields
+                rubricId: rubrics.id,
+                rubricName: rubrics.name,
+                grade: rubrics.grade,
+                intensity: rubrics.intensity,
+                category: rubrics.category,
+                language: rubrics.language,
+                created_by: rubrics.created_by,
+                createdAt: rubrics.createdAt,
+                // Criteria fields
+                criterionId: criteria.id,
+                criterionTitle: criteria.title,
+                // Level fields
+                levelId: levels.id,
+                levelLabel: levels.label,
+                levelScore: levels.score,
+                levelDescription: levels.description,
+            })
+            .from(rubrics)
+            .leftJoin(criteria, eq(rubrics.id, criteria.rubricId))
+            .leftJoin(levels, eq(criteria.id, levels.criterionId))
+            .where(eq(rubrics.name, rubricName))
+
+        if (!result.length) {
+            console.log(`Rubric '${rubricName}' not found`)
+            return null
+        }
+
+        // Transform flat result into nested structure
+        const rubricData = result[0]
+        const criteriaMap = new Map<number, Criteria>()
+
+        result.forEach((row) => {
+            if (row.criterionId) {
+                // Add criterion if not exists
+                if (!criteriaMap.has(row.criterionId)) {
+                    criteriaMap.set(row.criterionId, {
+                        id: row.criterionId,
+                        rubricId: row.rubricId,
+                        title: row.criterionTitle!,
+                        levels: [],
+                    })
+                }
+
+                // Add level if exists
+                if (row.levelId) {
+                    const criterion = criteriaMap.get(row.criterionId)!
+                    criterion.levels.push({
+                        id: row.levelId,
+                        criterionId: row.criterionId,
+                        label: row.levelLabel!,
+                        score: row.levelScore!,
+                        description: row.levelDescription ?? '',
+                    })
+                }
+            }
+        })
+
+        return {
+            id: rubricData.rubricId,
+            name: rubricData.rubricName,
+            grade: rubricData.grade,
+            intensity: rubricData.intensity,
+            category: rubricData.category,
+            language: rubricData.language,
+            created_by: rubricData.created_by,
+            createdAt: rubricData.createdAt,
+            criteria: Array.from(criteriaMap.values()),
+        }
+    } catch (error) {
+        console.error('Error in POST /api/essay/re-grade:', error)
+        throw error
+    }
 }

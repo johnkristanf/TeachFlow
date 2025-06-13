@@ -16,8 +16,23 @@ export async function publishToQueue(queue: string, message: any) {
     const { channel } = await initRabbitMQ()
     if (!channel) throw new Error('Failed to create channel')
 
-    await channel.assertQueue(queue, { durable: true })
+    const dlxName = 'grading_dlx'
+    const dlxRoutingKey = 'failed_grading'
 
+    await channel.assertExchange(dlxName, 'topic', { durable: true })
+
+    const dlqName = 'grading_dlq'
+    await channel.assertQueue(dlqName, { durable: true })
+    await channel.bindQueue(dlqName, dlxName, dlxRoutingKey)
+
+    await channel.assertQueue(queue, {
+        durable: true,
+        arguments: {
+            'x-dead-letter-exchange': dlxName,
+            'x-dead-letter-routing-key': dlxRoutingKey,
+        },
+    })
+    
     channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
         persistent: true,
     })

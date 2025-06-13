@@ -13,11 +13,20 @@ import { useState } from 'react'
 import { PrimaryButton } from '@/components/ui/primary-button'
 import { EssayWithEvalSummary } from '@/types/essay'
 
-import { Loader2 } from 'lucide-react'
-import { DialogDescription } from '@radix-ui/react-dialog'
+import { EllipsisVertical, Loader2 } from 'lucide-react'
 import DeleteEssay from '@/components/essays/delete-essay'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import PreviewEvaluation from '@/components/essays/preview-evaluation'
 
 export type Essay = {
     id: string
@@ -64,18 +73,35 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
             const colorMap: Record<string, string> = {
                 graded: 'bg-green-100 text-green-800',
                 pending: 'bg-yellow-100 text-yellow-800',
+                failed: 'bg-red-100 text-red-800',
             }
-
+            const pendingLoaderColor = '#3b82f6'
             const badgeClass = colorMap[status] || 'bg-gray-100 text-gray-800'
 
             return (
                 <div className="flex items-center gap-2">
                     {status === 'pending' && (
-                        <Loader2 className="w-4 h-4 animate-spin text-yellow-600" />
+                        <Badge className={badgeClass} variant="outline">
+                            <div className="flex items-center gap-2">
+                                <Loader2
+                                    className={`w-4 h-4 animate-spin text-[${pendingLoaderColor}]`}
+                                />
+                                EVALUATING
+                            </div>
+                        </Badge>
                     )}
-                    <Badge className={badgeClass} variant="outline">
-                        {status === 'pending' ? 'EVALUATING' : status.toUpperCase()}
-                    </Badge>
+
+                    {status === 'failed' && (
+                        <Badge className={badgeClass} variant="default">
+                            FAILED
+                        </Badge>
+                    )}
+
+                    {status === 'graded' && (
+                        <Badge className={badgeClass} variant="default">
+                            GRADED
+                        </Badge>
+                    )}
                 </div>
             )
         },
@@ -84,7 +110,7 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
-            const essay = row.original
+            const essay = row.original            
             const isGradingStatusPending = essay.status === 'pending'
 
             const queryClient = useQueryClient()
@@ -119,105 +145,88 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
                 },
             })
 
+            const regradeEssayMutation = useMutation({
+                mutationFn: async (formData: FormData) => {
+                    // Assuming you have a regrade API endpoint
+                    const res = await fetch(`/api/essay/re-grade`, {
+                        method: 'POST',
+                        body: formData,
+                    })
+
+                    const data = await res.json()
+
+                    if (!res.ok) {
+                        throw new Error(data?.message || 'Failed to regrade essay')
+                    }
+
+                    return data
+                },
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: ['essays'] })
+                    toast.success('Essay sent for regrading!')
+                },
+                onError: (err: any) => {
+                    console.error('Error regrading essay:', err)
+                    toast.error('Failed to regrade essay, please try again.')
+                },
+            })
+
             const handleDeleteEssay = () => {
                 deleteEssayMutation.mutate(essay.id)
             }
 
+            const handleRegradeEssay = (essayID: string, essayText: string, rubricUsed: string) => {
+                const formData = new FormData()
+                formData.append('essay_id', essayID)
+                formData.append('essay_text', essayText)
+                formData.append('rubric_used', rubricUsed)
+
+                regradeEssayMutation.mutate(formData)
+            }
+
             return (
                 <div className="flex items-center gap-2">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <PrimaryButton
-                                color="blue"
-                                size="sm"
-                                disabled={isGradingStatusPending}
-                                className={
-                                    isGradingStatusPending ? 'opacity-50 cursor-not-allowed' : ''
-                                }
-                            >
-                                Preview
-                            </PrimaryButton>
-                        </DialogTrigger>
-                        <DialogContent className="md:!max-w-3xl lg:!max-w-4xl">
-                            <DialogHeader>
-                                <DialogTitle>Evaluations for "{essay.name}"</DialogTitle>
-                            </DialogHeader>
-
-                            <div className="space-y-6 max-h-[70vh] overflow-y-auto px-1">
-                                {essay.evaluations?.length ? (
-                                    <>
-                                        {essay.evaluations.map((evalItem, index) => (
-                                            <div
-                                                key={index}
-                                                className="bg-white border rounded-lg p-4 shadow-sm space-y-3"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <h3 className="text-md font-semibold">
-                                                        {evalItem.criterion} ({evalItem.score}/
-                                                        {evalItem.max_score})
-                                                    </h3>
-                                                    {/* Optional Edit/Delete buttons here */}
-                                                </div>
-
-                                                <div className="text-sm text-gray-600">
-                                                    <p>{evalItem.reason}</p>
-                                                </div>
-
-                                                {evalItem.suggestion && (
-                                                    <div className="bg-blue-50 border-l-4 border-blue-400 p-3 text-sm rounded-md">
-                                                        <strong className="text-blue-700">
-                                                            Suggestion:
-                                                        </strong>{' '}
-                                                        {evalItem.suggestion}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-
-                                        {/* Overall Grade Section */}
-                                        {essay.summary &&
-                                            essay.summary.overall_feedback &&
-                                            essay.summary.total_score &&
-                                            essay.summary.max_total_score && (
-                                                <div className="bg-blue-600 text-white border rounded-lg p-4 shadow-sm space-y-3">
-                                                    <h1 className="text-xl font-semibold">
-                                                        Overall Evaluation
-                                                    </h1>
-
-                                                    <p className="text-md mb-2">
-                                                        Total Score: {essay.summary.total_score} /{' '}
-                                                        {essay.summary.max_total_score}{' '}
-                                                        {/* PERCENTAGE */}
-                                                        {(
-                                                            (essay.summary.total_score /
-                                                                essay.summary.max_total_score) *
-                                                            100
-                                                        ).toFixed(1)}
-                                                        %
-                                                    </p>
-
-                                                    <p className="text-md">
-                                                        Feedback: {essay.summary.overall_feedback}
-                                                    </p>
-                                                </div>
-                                            )}
-                                    </>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">
-                                        No evaluations available.
-                                    </p>
+                    {essay.status !== 'pending' && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger>
+                                <EllipsisVertical />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                {/* PREVIEW DROPDOWN MENU */}
+                                {essay.status !== 'failed' && essay.status !== 'pending' && (
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <PreviewEvaluation essay={essay} />
+                                    </DropdownMenuItem>
                                 )}
-                            </div>
-                        </DialogContent>
-                    </Dialog>
 
-                    <DeleteEssay
-                        onDelete={handleDeleteEssay}
-                        isPending={deleteEssayMutation.isPending}
-                        isGraded={!isGradingStatusPending}
-                        openDialog={openDeleteDialog}
-                        setOpenDialog={setOpenDeleteDialog}
-                    />
+                                {/* REGRADE DROPDOWN MENU */}
+                                <DropdownMenuItem
+                                    onSelect={(e) => e.preventDefault()}
+                                    onClick={() =>
+                                        handleRegradeEssay(
+                                            essay.id,
+                                            essay.essay_text,
+                                            essay.rubric_used
+                                        )
+                                    }
+                                >
+                                    Re-Grade
+                                </DropdownMenuItem>
+
+                                {/* DELETE DROPDOWN MENU */}
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    {' '}
+                                    <DeleteEssay
+                                        onDelete={handleDeleteEssay}
+                                        isPending={deleteEssayMutation.isPending}
+                                        isGraded={!isGradingStatusPending}
+                                        openDialog={openDeleteDialog}
+                                        setOpenDialog={setOpenDeleteDialog}
+                                    />
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
             )
         },
