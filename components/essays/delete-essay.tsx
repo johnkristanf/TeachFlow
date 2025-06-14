@@ -16,19 +16,19 @@ import { Dispatch, SetStateAction } from 'react'
 function DeleteEssay({
     onDelete,
     isPending,
-    isGraded,
     openDialog,
     setOpenDialog,
 }: {
     onDelete: () => void
     isPending: boolean
-    isGraded: boolean
     openDialog: boolean
     setOpenDialog: Dispatch<SetStateAction<boolean>>
 }) {
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger >Delete</DialogTrigger>
+            <DialogTrigger>
+                <p className="text-red-600">Delete</p>
+            </DialogTrigger>
             <DialogContent>
                 {isPending ? (
                     <SkeletonLoader msg="Deleting Essay..." />
@@ -36,7 +36,7 @@ function DeleteEssay({
                     <>
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-1">
-                                <CircleAlert className="text-red-800" />
+                                <CircleAlert className="text-red-400 size-5" />
                                 Are you absolutely sure?
                             </DialogTitle>
                             <DialogDescription>
@@ -47,13 +47,13 @@ function DeleteEssay({
 
                         <DialogFooter>
                             <DialogClose asChild>
-                                <PrimaryButton color="black" variant="solid">
+                                <PrimaryButton color="black" variant="outline">
                                     Cancel
                                 </PrimaryButton>
                             </DialogClose>
 
-                            <PrimaryButton color="red" variant="solid" onClick={onDelete}>
-                                Yes, Proceed
+                            <PrimaryButton color="red" variant="outline" onClick={onDelete}>
+                                Yes
                             </PrimaryButton>
                         </DialogFooter>
                     </>

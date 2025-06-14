@@ -26,10 +26,8 @@ function DeleteRubric({
 }) {
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-                <PrimaryButton color="red" variant="solid">
-                    Delete
-                </PrimaryButton>
+            <DialogTrigger>
+                <p className="text-red-600">Delete</p>
             </DialogTrigger>
             <DialogContent>
                 {isPending ? (
@@ -38,7 +36,7 @@ function DeleteRubric({
                     <>
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-1">
-                                <CircleAlert className="text-red-800" />
+                                <CircleAlert className="text-red-400 size-5" />
                                 Are you absolutely sure?
                             </DialogTitle>
                             <DialogDescription>
@@ -49,12 +47,12 @@ function DeleteRubric({
 
                         <DialogFooter>
                             <DialogClose>
-                                <PrimaryButton color="black" variant="solid">
+                                <PrimaryButton color="black" variant="outline">
                                     Cancel
                                 </PrimaryButton>
                             </DialogClose>
 
-                            <PrimaryButton color="red" variant="solid" onClick={onDelete}>
+                            <PrimaryButton color="red" variant="outline" onClick={onDelete}>
                                 Yes, Proceed
                             </PrimaryButton>
                         </DialogFooter>
