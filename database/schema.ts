@@ -44,10 +44,10 @@ export const levels = pgTable('levels', {
 
 // ESSAY
 export const essay = pgTable('essay', {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     name: varchar('name', { length: 255 }),
-    rubricUsed: text('rubric_used').notNull(),
-    sourceType: text('source_type').notNull(), // 'files upload' or 'text'
+    rubricID: integer('rubric_id').references(() => rubrics.id, { onDelete: 'set null' }),
+    sourceType: text('source_type').notNull(), // 'files upload' or 'webcam'
     essayText: text('essay_text').notNull(),
     status: text('status').notNull(),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
@@ -56,7 +56,7 @@ export const essay = pgTable('essay', {
 // GRADING ERROR LOGS
 export const essayGradingLogs = pgTable('essay_grading_logs', {
     id: serial('id').primaryKey(),
-    essayId: uuid('essay_id')
+    essayId: integer('essay_id') // Corrected: Should be integer, not serial
         .references(() => essay.id, { onDelete: 'cascade' })
         .notNull(),
     loggedAt: timestamp('logged_at', { mode: 'date' }).defaultNow(),
@@ -66,7 +66,6 @@ export const essayGradingLogs = pgTable('essay_grading_logs', {
 })
 
 // FEEDBACK
-export const performanceEnum = pgEnum('performance_enum', ['fast', 'acceptable', 'slow'])
 export const feedback = pgTable('feedback', {
     id: serial('id').primaryKey(),
     rating: integer('rating').notNull(),
@@ -76,6 +75,6 @@ export const feedback = pgTable('feedback', {
     suggestions: text('suggestions').notNull(),
     contact: varchar('contact', { length: 255 }),
     easeOfUse: integer('ease_of_use').notNull(),
-    performance: performanceEnum('performance').notNull(),
+    performance: varchar('contact', { length: 255 }),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })
