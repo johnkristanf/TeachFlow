@@ -59,7 +59,10 @@ export async function getEssays() {
                 WHEN r.id IS NOT NULL THEN
                     json_build_object(
                         'id', r.id,
-                        'name', r.name
+                        'name', r.name,
+                        'category', r.category,
+                        'grade', r.grade,
+                        'intensity', r.intensity
                     )
                 ELSE NULL
             END AS rubric
