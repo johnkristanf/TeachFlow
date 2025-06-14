@@ -9,17 +9,20 @@ export async function POST(req: NextRequest) {
 
         const essayID = formData.get('essay_id') as string
         const essayText = formData.get('essay_text') as string
+        const rubricName = formData.get('rubric_name') as string
         const rubricCategory = formData.get('rubric_category') as string
         const gradeLevel = formData.get('grade_level') as string
         const gradeIntensity = formData.get('grade_intensity') as string
-        const rubricUsed = formData.get('rubric_used') as string
 
         console.log('Form Fields:')
         console.log('- essay_id:', essayID)
         console.log('- essayText:', essayText)
-        console.log('- rubric_used:', rubricUsed)
+        console.log('- rubric_name:', rubricName)
+        console.log('- rubric_category:', rubricCategory)
+        console.log('- grade_level:', gradeLevel)
+        console.log('- grade_intensity:', gradeIntensity)
 
-        const rubricCriteria = await getRubricCriteria(rubricUsed)
+        const rubricCriteria = await getRubricCriteria(rubricName)
         console.log('- rubricCriteria:', rubricCriteria)
 
         await publishToQueue('grading_events', {
