@@ -229,18 +229,25 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
             const handleRegradeEssay = (
                 essayID: string,
                 essayText: string,
+                rubricName: string,
                 rubricCategory: string,
                 gradeLevel: string,
-                gradeIntensity: string,
-                rubricUsed: string
+                gradeIntensity: string
             ) => {
+                console.log("essayID: ", essayID);
+                console.log("essayText: ", essayText);
+                console.log("rubricName: ", rubricName);
+                console.log("rubricCategory: ", rubricCategory);
+                console.log("gradeLevel: ", gradeLevel);
+                console.log("gradeIntensity: ", gradeIntensity);
+                
                 const formData = new FormData()
                 formData.append('essay_id', essayID)
                 formData.append('essay_text', essayText)
+                formData.append('rubric_name', rubricName)
                 formData.append('rubric_category', rubricCategory)
                 formData.append('grade_level', gradeLevel)
                 formData.append('grade_intensity', gradeIntensity)
-                formData.append('rubric_used', rubricUsed)
 
                 regradeEssayMutation.mutate(formData)
             }
@@ -262,19 +269,21 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
 
                                 {/* REGRADE DROPDOWN MENU */}
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                    {/* <RegradeDialog
+                                    <RegradeDialog
                                         onRegrade={() =>
                                             handleRegradeEssay(
                                                 essay.id,
                                                 essay.essay_text,
-                                                
-                                                essay.rubric_used
+                                                essay.rubric.name,
+                                                essay.rubric.category,
+                                                essay.rubric.grade,
+                                                essay.rubric.intensity
                                             )
                                         }
                                         isPending={regradeEssayMutation.isPending}
                                         openDialog={openRegradeDialog}
                                         setOpenDialog={setOpenRegradeDialog}
-                                    /> */}
+                                    />
                                 </DropdownMenuItem>
 
                                 {/* DELETE DROPDOWN MENU */}
