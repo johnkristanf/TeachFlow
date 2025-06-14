@@ -70,13 +70,6 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         }))
     }
 
-    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setFormData((prev) => ({
-            ...prev,
-            textContent: e.target.value,
-        }))
-    }
-
     const handleDropFile = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
 
@@ -160,7 +153,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         }
     }
 
-    const mutation = useMutation({
+    const gradeEssayMutation = useMutation({
         mutationFn: async (data: FormData) => {
             const res = await fetch(`/api/essay`, {
                 method: 'POST',
@@ -196,10 +189,11 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
             return
         }
 
-        console.log('formData.rubric_criteria: ', formData.rubric_criteria)
-
         const submitData = new FormData()
-        submitData.append('rubric_name', selectedRubric.name)
+        submitData.append('rubric_id', selectedRubric.id.toString())
+        submitData.append('rubric_category', selectedRubric.category)
+        submitData.append('grade_level', selectedRubric.grade)
+        submitData.append('grade_intensity', selectedRubric.intensity)
         submitData.append('rubric_criteria', JSON.stringify(formData.rubric_criteria))
         submitData.append('gradingMethod', formData.gradingMethod)
 
@@ -217,9 +211,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         }
 
         console.log('Submit Data:', Array.from(submitData.entries()))
-
-        // Handle form submission here
-        mutation.mutate(submitData)
+        gradeEssayMutation.mutate(submitData)
     }
 
     // Effect to assign stream to video element when webcam becomes active
@@ -238,7 +230,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
     return (
         <div>
-            {mutation.isPending ? (
+            {gradeEssayMutation.isPending ? (
                 <SkeletonLoader msg="Submitting Essay for Evaluation..." />
             ) : (
                 <>
@@ -315,7 +307,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                 {selectedRubric?.created_by ? (
                                     <div className="flex flex-col">
                                         <p className="text-sm">
-                                            Created by{' '}
+                                            Created by: {' '}
                                             <span className="font-semibold text-blue-500">
                                                 {selectedRubric.created_by === 'teachflow_rubrics'
                                                     ? 'TeachFlow'
@@ -323,10 +315,9 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                             </span>
                                         </p>
 
-                                        <p className="text-xs">
+                                        <p className="text-sm">
                                             Language:{' '}
-                                            <span className="text-blue-500 font-semibold">
-                                                {' '}
+                                            <span className="font-semibold text-blue-500">
                                                 {selectedRubric.language}
                                             </span>
                                         </p>
@@ -658,12 +649,12 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                 variant="solid"
                                 color="blue"
                                 size="md"
-                                disabled={mutation.isPending}
+                                disabled={gradeEssayMutation.isPending}
                                 className={
-                                    mutation.isPending ? 'bg-gray-500 cursor-not-allowed' : ''
+                                    gradeEssayMutation.isPending ? 'bg-gray-500 cursor-not-allowed' : ''
                                 }
                             >
-                                {mutation.isPending ? 'Submitting...' : 'Submit'}
+                                {gradeEssayMutation.isPending ? 'Submitting...' : 'Submit'}
                             </PrimaryButton>
                         </div>
                     </form>
