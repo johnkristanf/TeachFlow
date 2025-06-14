@@ -9,6 +9,9 @@ export async function POST(req: NextRequest) {
 
         const essayID = formData.get('essay_id') as string
         const essayText = formData.get('essay_text') as string
+        const rubricCategory = formData.get('rubric_category') as string
+        const gradeLevel = formData.get('grade_level') as string
+        const gradeIntensity = formData.get('grade_intensity') as string
         const rubricUsed = formData.get('rubric_used') as string
 
         console.log('Form Fields:')
@@ -23,13 +26,15 @@ export async function POST(req: NextRequest) {
             event: 'ESSAY_SUBMITTED',
             essay_id: essayID,
             essay_text: essayText,
+            rubric_category: rubricCategory,
+            grade_level: gradeLevel,
+            grade_intensity: gradeIntensity,
             rubric_criteria: rubricCriteria,
         })
 
         await updateEssayStatus(essayID, 'pending')
 
         return NextResponse.json({ message: 'Submitted for Regrading' })
-
     } catch (error) {
         console.error('Failed regrade essay:', error)
         return NextResponse.json({ message: 'Server error' }, { status: 500 })

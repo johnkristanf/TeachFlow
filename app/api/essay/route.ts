@@ -11,12 +11,18 @@ export async function POST(req: NextRequest) {
     const files = formData.getAll('files')
 
     // Get other form data fields
-    const rubricName = formData.get('rubric_name') as string
+    const rubricID = formData.get('rubric_id') as string
+    const rubricCategory = formData.get('rubric_category') as string
+    const gradeLevel = formData.get('grade_level') as string
+    const gradeIntensity = formData.get('grade_intensity') as string
     const rubricCriteria = formData.get('rubric_criteria') as string
     const gradingMethod = formData.get('gradingMethod') as string
 
     console.log('Form Fields:')
-    console.log('- rubric_name:', rubricName)
+    console.log('- rubric_id:', rubricID)
+    console.log('- rubric_category:', rubricCategory)
+    console.log('- grade_level:', gradeLevel)
+    console.log('- grade_intensity:', gradeIntensity)
     console.log('- rubric_criteria:', rubricCriteria)
     console.log('- gradingMethod:', gradingMethod)
 
@@ -30,7 +36,7 @@ export async function POST(req: NextRequest) {
 
                 const essayData: Essay = {
                     name: file.name,
-                    rubricUsed: rubricName,
+                    rubricID: Number(rubricID),
                     sourceType: gradingMethod,
                     essayText: extractedText,
                     status: 'pending',
@@ -43,6 +49,9 @@ export async function POST(req: NextRequest) {
                     event: 'ESSAY_SUBMITTED',
                     essay_id: essayID,
                     essay_text: extractedText,
+                    rubric_category: rubricCategory,
+                    grade_level: gradeLevel,
+                    grade_intensity: gradeIntensity,
                     rubric_criteria: JSON.parse(rubricCriteria),
                 })
             } catch (error) {
