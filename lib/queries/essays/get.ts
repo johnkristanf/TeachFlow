@@ -1,19 +1,30 @@
 import { db } from '@/database'
-import { criteria, levels, rubrics } from '@/database/schema'
-import { Criteria, Levels } from '@/types/rubrics'
-import { eq, sql } from 'drizzle-orm'
-import { NextRequest, NextResponse } from 'next/server'
 
 export async function getEssays() {
     const result = await db.execute(`
+
+        WITH LatestGradingLog AS (
+            SELECT
+                id,
+                essay_id,
+                logged_at,
+                failure_type,
+                error_message,
+                error_details,
+                ROW_NUMBER() OVER (PARTITION BY essay_id ORDER BY logged_at DESC) as rn
+            FROM
+                essay_grading_logs
+        )
+
        SELECT 
             e.id,
             e.name,
-            e.rubric_used,
+            e.rubric_id,
             e.source_type,
             e.essay_text,
             e.status,
             e.created_at,
+            to_jsonb(es) - 'essay_id' AS summary,
 
             COALESCE(
                 json_agg(
@@ -30,25 +41,35 @@ export async function getEssays() {
                 ) FILTER (WHERE ev.id IS NOT NULL), '[]'
             ) AS evaluations,
 
-            to_jsonb(es) - 'essay_id' AS summary,
 
-            COALESCE(
-                json_agg(
+            CASE
+                WHEN e.status = 'failed' AND lgl.id IS NOT NULL THEN
                     json_build_object(
-                        'id', egl.id,
-                        'logged_at', egl.logged_at,
-                        'failure_type', egl.failure_type,
-                        'error_message', egl.error_message,
-                        'error_details', egl.error_details
+                        'id', lgl.id,
+                        'logged_at', lgl.logged_at,
+                        'failure_type', lgl.failure_type,
+                        'error_message', lgl.error_message,
+                        'error_details', lgl.error_details
                     )
-                ) FILTER (WHERE egl.id IS NOT NULL), '[]'
-            ) AS grading_logs
+                ELSE NULL
+            END AS error_grading_log,
+
+
+            CASE
+                WHEN r.id IS NOT NULL THEN
+                    json_build_object(
+                        'id', r.id,
+                        'name', r.name
+                    )
+                ELSE NULL
+            END AS rubric
 
         FROM essay e
         LEFT JOIN essay_evaluations ev ON e.id = ev.essay_id
         LEFT JOIN essay_summaries es ON e.id = es.essay_id
-        LEFT JOIN essay_grading_logs egl ON e.id = egl.essay_id
-        GROUP BY e.id, es.id
+        LEFT JOIN LatestGradingLog lgl ON e.id = lgl.essay_id AND lgl.rn = 1 
+        LEFT JOIN rubrics r ON e.rubric_id = r.id
+        GROUP BY e.id, es.id, r.id, lgl.id, lgl.logged_at, lgl.failure_type, lgl.error_message, lgl.error_details 
         ORDER BY e.created_at DESC;
     `)
 

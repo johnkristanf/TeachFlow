@@ -1,6 +1,8 @@
+import { Rubric } from "./rubrics"
+
 export type Essay = {
     name?: string
-    rubricUsed: string
+    rubricID: number
     sourceType: string
     essayText: string
     status: string
@@ -24,7 +26,7 @@ export interface Summary {
     overall_feedback?: string
 }
 
-export interface GradingLog {
+export interface ErrorGradingLog {
     id: number // Assuming 'id' is serial/integer in essayGradingLogs
     logged_at: Date
     failure_type: string
@@ -35,13 +37,13 @@ export interface GradingLog {
 export interface EssayWithEvalSummary {
     id: string
     name: string | null
-    rubric_used: string
     source_type: string
     essay_text: string
     status: string
     created_at: Date
 
-    evaluations: Evaluation[] // array of evaluations
-    summary?: Summary // optional summary object
-    grading_logs?: GradingLog[] // optional array of grading logs
+    evaluations: Evaluation[] 
+    summary?: Summary 
+    error_grading_log?: ErrorGradingLog
+    rubric: Rubric,
 }

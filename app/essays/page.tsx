@@ -27,7 +27,10 @@ export default function EssayPage() {
         queryKey: ['essays'],
         queryFn: async () => {
             const res = await fetch('/api/essay')
-            if (!res.ok) throw new Error('Failed to fetch essays')
+            if (!res.ok) {
+                throw new Error('Failed to fetch essays')
+            }
+
             return res.json()
         },
         refetchInterval: pollingInterval,
@@ -37,10 +40,9 @@ export default function EssayPage() {
     useEffect(() => {
         if (!data) return
 
-        console.log('essay 123: ', data)
+        console.log('essay new: ', data)
 
         const hasPending = data.some((essay) => essay.status === 'pending')
-
         if (hasPending) {
             setHasPendingStatus(true)
             setPollingInterval(hasPending ? 30000 : false)
