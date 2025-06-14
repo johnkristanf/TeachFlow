@@ -25,10 +25,10 @@ const variants: Record<Variant, Record<Color, string>> = {
         green: 'bg-green-600 hover:bg-green-700 text-white',
     },
     outline: {
-        black: 'border border-gray-900 text-gray-600 hover:bg-gray-100',
-        blue: 'border border-blue-900 text-blue-600 hover:bg-blue-100',
-        red: 'border border-red-900 text-red-600 hover:bg-red-100',
-        green: 'border border-green-900 text-green-600 hover:bg-green-100',
+        black: 'border border-gray-900 text-gray-600 hover:bg-gray-300',
+        blue: 'border border-blue-900 text-blue-600 hover:bg-blue-200',
+        red: 'border border-red-900 text-red-600 hover:bg-red-200',
+        green: 'border border-green-900 text-green-600 hover:bg-green-200',
 
     },
 }
