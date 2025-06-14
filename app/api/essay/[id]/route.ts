@@ -4,7 +4,7 @@ import { eq, sql } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const essayID = params.id
+    const essayID = Number(params.id)
     try {
         await db.transaction(async (tx) => {
             await tx.delete(essay).where(eq(essay.id, essayID))
