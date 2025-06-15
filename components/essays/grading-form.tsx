@@ -8,10 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
     Drawer,
-    DrawerClose,
     DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
@@ -21,9 +18,13 @@ import { useRubricStore } from '@/store/useStoreRubric'
 import { convertBase64ToFile, formatFileSize } from '@/lib/utils'
 import { Criteria } from '@/types/rubrics'
 import { SkeletonLoader } from '../skeleton-loading'
-import { FileIcon, FileUp } from 'lucide-react'
+import { FileUp, Info, RotateCw } from 'lucide-react'
 import { DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
-
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 type EssayGradingFormProps = {
     onCloseDialog?: () => void
 }
@@ -66,7 +67,9 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
     const removeImage = (indexToRemove: number) => {
         setFormData((prev) => ({
             ...prev,
-            capturedImages: prev.capturedImages.filter((_, index) => index !== indexToRemove),
+            capturedImages: prev.capturedImages.filter(
+                (_, index) => index !== indexToRemove
+            ),
         }))
     }
 
@@ -83,44 +86,78 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
     }
 
     const triggerFileInput = () => {
-        const fileInput = document.getElementById('hidden-file-input') as HTMLInputElement
+        const fileInput = document.getElementById(
+            'hidden-file-input'
+        ) as HTMLInputElement
         fileInput?.click()
     }
 
     // WEBCAM FUNCTIONALITIES
     const [webcamActive, setWebcamActive] = useState(false)
+    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
+
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const streamRef = useRef<MediaStream | null>(null)
-    const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
     const stopWebcam = () => {
         if (streamRef.current) {
             streamRef.current.getTracks().forEach((track) => track.stop())
             streamRef.current = null
         }
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current)
-            intervalRef.current = null
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = null
         }
+
         setWebcamActive(false)
     }
 
     // Start webcam
-    const startWebcam = async () => {
-        stopWebcam();
-        
+    const startWebcam = async (newFacingMode?: 'user' | 'environment') => {
+        stopWebcam()
+
+        const currentFacingMode = newFacingMode || facingMode
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 640, height: 480 },
+                video: {
+                    width: { min: 1280, ideal: 1920, max: 2560 },
+                    height: { min: 720, ideal: 1080, max: 1440 },
+                    facingMode: currentFacingMode,
+                },
             })
 
             streamRef.current = stream
             setWebcamActive(true)
+            setFacingMode(currentFacingMode) // Update state to reflect active camera
         } catch (error) {
             console.error('Error accessing webcam:', error)
-            alert('Unable to access webcam. Please check permissions.')
+            let errorMessage =
+                "Unable to access your webcam. Please ensure it's connected and that you've granted permission to use it."
+            if (error instanceof DOMException) {
+                if (error.name === 'NotAllowedError') {
+                    errorMessage =
+                        'Permission to access the webcam was denied. Please allow camera access in your browser settings.'
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage = 'No webcam found on your device.'
+                } else if (error.name === 'NotReadableError') {
+                    errorMessage =
+                        'The webcam is already in use by another application or the browser.'
+                } else if (error.name === 'OverconstrainedError') {
+                    errorMessage =
+                        'Your browser could not find a camera matching the requested settings (e.g., specific resolution or facing mode).'
+                }
+            }
+            toast.warning(errorMessage)
         }
+    }
+
+    // TOGGLE CAMERA FACING
+    const toggleCamera = () => {
+        const newMode = facingMode === 'user' ? 'environment' : 'user'
+        setFacingMode(newMode) // Update state immediately
+        startWebcam(newMode) // Restart webcam with the new facing mode
     }
 
     const captureImage = () => {
@@ -134,11 +171,20 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                 canvas.width = video.videoWidth
                 canvas.height = video.videoHeight
 
+                console.log(
+                    'Actual video resolution:',
+                    video.videoWidth,
+                    'x',
+                    video.videoHeight
+                )
+
                 // Draw current video frame to canvas
                 context.drawImage(video, 0, 0, canvas.width, canvas.height)
+                context.imageSmoothingEnabled = true
+                context.imageSmoothingQuality = 'high'
 
                 // Convert to base64 image
-                const imageData = canvas.toDataURL('image/jpeg', 0.8)
+                const imageData = canvas.toDataURL('image/jpeg', 0.95)
 
                 // Add to captured images
                 setFormData((prev) => ({
@@ -184,7 +230,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         e.preventDefault()
         formData.rubric_criteria = selectedRubricCriteria
 
-        if (selectedRubric.name == '') {
+        if (!selectedRubric || selectedRubric.name == '') {
             toast.warning('You must select a grading rubric')
             return
         }
@@ -194,16 +240,17 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         submitData.append('rubric_category', selectedRubric.category)
         submitData.append('grade_level', selectedRubric.grade)
         submitData.append('grade_intensity', selectedRubric.intensity)
-        submitData.append('rubric_criteria', JSON.stringify(formData.rubric_criteria))
+        submitData.append(
+            'rubric_criteria',
+            JSON.stringify(formData.rubric_criteria)
+        )
         submitData.append('gradingMethod', formData.gradingMethod)
 
         if (formData.gradingMethod === 'files' && formData.files) {
-            // Append each uploaded files
             for (let i = 0; i < formData.files.length; i++) {
                 submitData.append('files', formData.files[i])
             }
         } else if (formData.gradingMethod === 'webcam') {
-            // Convert base64 images to files
             formData.capturedImages.forEach((imageData, index) => {
                 const file = convertBase64ToFile(imageData, index)
                 submitData.append('files', file)
@@ -211,6 +258,9 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         }
 
         console.log('Submit Data:', Array.from(submitData.entries()))
+        if (webcamActive && formData.gradingMethod == 'webcam') {
+            stopWebcam()
+        }
         gradeEssayMutation.mutate(submitData)
     }
 
@@ -237,15 +287,17 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                     <DialogHeader>
                         <DialogTitle>Start Grading</DialogTitle>
                         <DialogDescription>
-                            Please select the assessment attributes to guide the automated
-                            evaluation. The grading process will proceed based on the criteria you
-                            define.
+                            Please select the assessment attributes to guide the
+                            automated evaluation. The grading process will
+                            proceed based on the criteria you define.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-3 bg-gray-100 p-3 rounded-md">
                             <div className="flex items-center justify-between">
-                                <label className="text-base font-medium">Rubric</label>
+                                <label className="text-base font-medium">
+                                    Rubric
+                                </label>
 
                                 <Drawer direction="right">
                                     <DrawerTrigger asChild>
@@ -260,7 +312,9 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                     </DrawerTrigger>
                                     <DrawerContent>
                                         <DrawerHeader>
-                                            <DrawerTitle>Select Rubric</DrawerTitle>
+                                            <DrawerTitle>
+                                                Select Rubric
+                                            </DrawerTitle>
                                         </DrawerHeader>
 
                                         {/* TABS */}
@@ -270,7 +324,8 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                             </div>
 
                             <div className="flex justify-between items-center p-4 bg-white rounded-lg">
-                                {selectedRubricCriteria && selectedRubricCriteria.length > 0 ? (
+                                {selectedRubricCriteria &&
+                                selectedRubricCriteria.length > 0 ? (
                                     <div className="flex flex-col">
                                         <p className="text-xl font-medium mb-1">
                                             {selectedRubric.name}
@@ -307,9 +362,10 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                 {selectedRubric?.created_by ? (
                                     <div className="flex flex-col">
                                         <p className="text-sm">
-                                            Created by: {' '}
+                                            Created by:{' '}
                                             <span className="font-semibold text-blue-500">
-                                                {selectedRubric.created_by === 'teachflow_rubrics'
+                                                {selectedRubric.created_by ===
+                                                'teachflow_rubrics'
                                                     ? 'TeachFlow'
                                                     : 'Me'}
                                             </span>
@@ -332,27 +388,39 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
                         <div className="space-y-3 bg-gray-100 p-3 rounded-md">
                             <label className="text-base font-medium">
-                                Upload essay(s) <span className="text-red-500">*</span>
+                                Choose essay grading method{' '}
+                                <span className="text-red-500">*</span>
                             </label>
 
                             <RadioGroup
                                 value={formData.gradingMethod}
                                 onValueChange={(value) => {
-                                    setFormData((prev) => ({ ...prev, gradingMethod: value }))
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        gradingMethod: value,
+                                    }))
                                     // Stop webcam when switching away from it
                                     if (value !== 'webcam') {
                                         stopWebcam()
                                     }
                                 }}
-                                className="flex space-x-6"
+                                className="flex space-x-6 mt-3"
                             >
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="files" id="files" />
+                                    <RadioGroupItem
+                                        value="files"
+                                        id="files"
+                                        className="border-blue-500"
+                                    />
                                     <label htmlFor="files">Select files</label>
                                 </div>
 
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="webcam" id="webcam" />
+                                    <RadioGroupItem
+                                        value="webcam"
+                                        id="webcam"
+                                        className="border-blue-500 "
+                                    />
                                     <label htmlFor="webcam">Webcam</label>
                                 </div>
                             </RadioGroup>
@@ -376,10 +444,14 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                             <PrimaryButton
                                                                 type="button"
                                                                 onClick={() =>
-                                                                    setFormData((prev) => ({
-                                                                        ...prev,
-                                                                        files: [],
-                                                                    }))
+                                                                    setFormData(
+                                                                        (
+                                                                            prev
+                                                                        ) => ({
+                                                                            ...prev,
+                                                                            files: [],
+                                                                        })
+                                                                    )
                                                                 }
                                                             >
                                                                 Cancel
@@ -387,89 +459,111 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                         </div>
                                                         <div className="flex items-center space-x-4">
                                                             <span className="text-sm text-gray-600">
-                                                                {formData.files.length} file
-                                                                {formData.files.length !== 1
+                                                                {
+                                                                    formData
+                                                                        .files
+                                                                        .length
+                                                                }{' '}
+                                                                file
+                                                                {formData.files
+                                                                    .length !==
+                                                                1
                                                                     ? 's'
                                                                     : ''}{' '}
                                                                 selected
                                                             </span>
                                                             <h1
                                                                 className=" text-blue-600 hover:underline hover:cursor-pointer"
-                                                                onClick={triggerFileInput}
+                                                                onClick={
+                                                                    triggerFileInput
+                                                                }
                                                             >
                                                                 <span>+</span>
-                                                                <span>Add more</span>
+                                                                <span>
+                                                                    Add more
+                                                                </span>
                                                             </h1>
                                                         </div>
                                                     </div>
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                                        {formData.files.map((file, index) => {
-                                                            const isImage =
-                                                                file.type.startsWith('image/')
-                                                            const previewUrl = isImage
-                                                                ? URL.createObjectURL(file)
-                                                                : null
+                                                        {formData.files.map(
+                                                            (file, index) => {
+                                                                const isImage =
+                                                                    file.type.startsWith(
+                                                                        'image/'
+                                                                    )
+                                                                const previewUrl =
+                                                                    isImage
+                                                                        ? URL.createObjectURL(
+                                                                              file
+                                                                          )
+                                                                        : null
 
-                                                            return (
-                                                                <div
-                                                                    key={`${file.name}-${index}`}
-                                                                    className="relative"
-                                                                >
-                                                                    <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() =>
-                                                                                removeFile(index)
-                                                                            }
-                                                                            className="absolute -top-2 -right-2 w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm hover:bg-gray-800 z-10"
-                                                                        >
-                                                                            ×
-                                                                        </button>
-                                                                        <div className="flex flex-col items-center space-y-2">
-                                                                            {/* UPLOADED FILE PREVIEW */}
-                                                                            <div className="w-full h-40 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden">
-                                                                                {isImage ? (
-                                                                                    <img
-                                                                                        src={
-                                                                                            previewUrl!
-                                                                                        }
-                                                                                        alt={
+                                                                return (
+                                                                    <div
+                                                                        key={`${file.name}-${index}`}
+                                                                        className="relative"
+                                                                    >
+                                                                        <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() =>
+                                                                                    removeFile(
+                                                                                        index
+                                                                                    )
+                                                                                }
+                                                                                className="absolute -top-2 -right-2 w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm hover:bg-gray-800 z-10"
+                                                                            >
+                                                                                ×
+                                                                            </button>
+                                                                            <div className="flex flex-col items-center space-y-2">
+                                                                                {/* UPLOADED FILE PREVIEW */}
+                                                                                <div className="w-full h-40 bg-white rounded border border-gray-300 flex items-center justify-center overflow-hidden">
+                                                                                    {isImage ? (
+                                                                                        <img
+                                                                                            src={
+                                                                                                previewUrl!
+                                                                                            }
+                                                                                            alt={
+                                                                                                file.name
+                                                                                            }
+                                                                                            className="object-contain w-full h-full"
+                                                                                            onLoad={() =>
+                                                                                                URL.revokeObjectURL(
+                                                                                                    previewUrl!
+                                                                                                )
+                                                                                            }
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <div className="w-8 h-10 bg-gray-200 rounded flex items-center justify-center text-2xl">
+                                                                                            📄
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="text-center mt-2">
+                                                                                    <p
+                                                                                        className="text-sm font-medium text-gray-900 truncate max-w-[150px]"
+                                                                                        title={
                                                                                             file.name
                                                                                         }
-                                                                                        className="object-contain w-full h-full"
-                                                                                        onLoad={() =>
-                                                                                            URL.revokeObjectURL(
-                                                                                                previewUrl!
-                                                                                            )
+                                                                                    >
+                                                                                        {
+                                                                                            file.name
                                                                                         }
-                                                                                    />
-                                                                                ) : (
-                                                                                    <div className="w-8 h-10 bg-gray-200 rounded flex items-center justify-center text-2xl">
-                                                                                        📄
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                            <div className="text-center mt-2">
-                                                                                <p
-                                                                                    className="text-sm font-medium text-gray-900 truncate max-w-[150px]"
-                                                                                    title={
-                                                                                        file.name
-                                                                                    }
-                                                                                >
-                                                                                    {file.name}
-                                                                                </p>
-                                                                                <p className="text-xs text-gray-500">
-                                                                                    {formatFileSize(
-                                                                                        file.size
-                                                                                    )}
-                                                                                </p>
+                                                                                    </p>
+                                                                                    <p className="text-xs text-gray-500">
+                                                                                        {formatFileSize(
+                                                                                            file.size
+                                                                                        )}
+                                                                                    </p>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            )
-                                                        })}
+                                                                )
+                                                            }
+                                                        )}
                                                     </div>
                                                 </div>
                                             ) : (
@@ -480,7 +574,9 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                             Drop files here,{' '}
                                                             <button
                                                                 type="button"
-                                                                onClick={triggerFileInput}
+                                                                onClick={
+                                                                    triggerFileInput
+                                                                }
                                                                 className="text-blue-600 underline hover:text-blue-800"
                                                             >
                                                                 browse files
@@ -537,12 +633,15 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                         📷
                                                     </div>
                                                     <p className="text-gray-600 mb-4">
-                                                        Start your webcam to capture essay images
+                                                        Start your webcam to
+                                                        capture essay images
                                                         continuously
                                                     </p>
                                                     <PrimaryButton
                                                         type="button"
-                                                        onClick={startWebcam}
+                                                        onClick={() =>
+                                                            startWebcam()
+                                                        } // Call with no args to use current facingMode
                                                         color="blue"
                                                     >
                                                         Start Webcam
@@ -551,28 +650,56 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                             ) : (
                                                 <div className="space-y-4">
                                                     {/* Video Display */}
-                                                    <div
-                                                        className="relative mx-auto"
-                                                        style={{ maxWidth: '640px' }}
-                                                    >
-                                                        <video
-                                                            ref={videoRef}
-                                                            autoPlay
-                                                            muted
-                                                            playsInline
-                                                            className="w-full rounded-lg border"
-                                                        />
-                                                        <canvas
-                                                            ref={canvasRef}
-                                                            className="hidden"
-                                                        />
+
+                                                    <div className="flex flex-col">
+                                                        <h1 className="text-center text-md font-medium text-blue-600 mb-4">
+                                                            * Please capture your
+                                                            image in good
+                                                            lighting, hold your
+                                                            device steady, and
+                                                            ensure the text is
+                                                            clearly visible.
+                                                        </h1>
+
+                                                        <div
+                                                            className="relative mx-auto"
+                                                            style={{
+                                                                maxWidth:
+                                                                    '420px',
+                                                            }}
+                                                        >
+                                                            <video
+                                                                ref={videoRef}
+                                                                autoPlay
+                                                                muted
+                                                                playsInline
+                                                                className="w-full h-full rounded-lg border"
+                                                            />
+                                                            <canvas
+                                                                ref={canvasRef}
+                                                                className="hidden"
+                                                            />
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={
+                                                                    toggleCamera
+                                                                }
+                                                                className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                                                title="Toggle Camera"
+                                                            >
+                                                                <RotateCw className="w-5 h-5" />
+                                                            </button>
+                                                        </div>
                                                     </div>
 
                                                     {/* Controls */}
                                                     <div className="flex justify-center space-x-4">
                                                         <PrimaryButton
                                                             type="button"
-                                                            onClick={captureImage}
+                                                            onClick={
+                                                                captureImage
+                                                            }
                                                             color="blue"
                                                         >
                                                             📸 Capture Now
@@ -597,7 +724,11 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                             <div className="flex items-center justify-between">
                                                 <h3 className="text-lg font-medium">
                                                     Captured Images (
-                                                    {formData.capturedImages.length})
+                                                    {
+                                                        formData.capturedImages
+                                                            .length
+                                                    }
+                                                    )
                                                 </h3>
                                                 <PrimaryButton
                                                     type="button"
@@ -615,27 +746,42 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                             </div>
 
                                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                                {formData.capturedImages.map((imageData, index) => (
-                                                    <div key={index} className="relative">
-                                                        <div className="bg-gray-100 rounded-lg p-2 border border-gray-200">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeImage(index)}
-                                                                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 z-10"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                            <img
-                                                                src={imageData}
-                                                                alt={`Captured ${index + 1}`}
-                                                                className="w-full h-24 object-cover rounded"
-                                                            />
-                                                            <p className="text-xs text-gray-500 text-center mt-1">
-                                                                Image {index + 1}
-                                                            </p>
+                                                {formData.capturedImages.map(
+                                                    (imageData, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="relative"
+                                                        >
+                                                            <div className="bg-gray-100 rounded-lg p-2 border border-gray-200">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        removeImage(
+                                                                            index
+                                                                        )
+                                                                    }
+                                                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 z-10"
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                                <img
+                                                                    src={
+                                                                        imageData
+                                                                    }
+                                                                    alt={`Captured ${
+                                                                        index +
+                                                                        1
+                                                                    }`}
+                                                                    className="w-full h-24 object-cover rounded"
+                                                                />
+                                                                <p className="text-xs text-gray-500 text-center mt-1">
+                                                                    Image{' '}
+                                                                    {index + 1}
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    )
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -646,15 +792,19 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                         <div className="flex justify-end">
                             <PrimaryButton
                                 type="submit"
-                                variant="solid"
+                                variant="outline"
                                 color="blue"
                                 size="md"
                                 disabled={gradeEssayMutation.isPending}
                                 className={
-                                    gradeEssayMutation.isPending ? 'bg-gray-500 cursor-not-allowed' : ''
+                                    gradeEssayMutation.isPending
+                                        ? 'bg-gray-500 cursor-not-allowed'
+                                        : ''
                                 }
                             >
-                                {gradeEssayMutation.isPending ? 'Submitting...' : 'Submit'}
+                                {gradeEssayMutation.isPending
+                                    ? 'Submitting...'
+                                    : 'Submit'}
                             </PrimaryButton>
                         </div>
                     </form>
