@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "drizzle:migrate": "drizzle-kit migrate",
+    "build": "npm run drizzle:migrate && next build",
     "start": "next start",
     "lint": "next lint"
   },
