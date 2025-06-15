@@ -57,16 +57,16 @@ export default function ClassesPage() {
     return (
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-4xl font-bold text-gray-800">Classes</h1>
+                <h1 className="text-4xl font-bold text-blue-600">Classes</h1>
                 <AddNewClassDialog />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {classes && classes.length > 0 ? (
                     classes.map((classItem) => (
                         <div
                             key={classItem.id} // Use unique ID for key
-                            className="w-64 rounded-lg shadow-md p-6 border border-gray-200"
+                            className="md:w-64 border-l-4 border-blue-400 border rounded-lg p-4 shadow-sm space-y-3"
                         >
                             <h2 className="text-xl font-semibold text-gray-800 mb-2">
                                 {classItem.name}
@@ -106,24 +106,7 @@ export default function ClassesPage() {
                 )}
             </div>
 
-            {/* Pagination (as requested in the original image, kept in case you still need it) */}
-            <div className="flex justify-center items-center mt-12 space-x-1">
-                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
-                    &laquo;
-                </button>
-                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
-                    &lsaquo;
-                </button>
-                <button className="px-4 py-2 rounded-md bg-blue-600 text-white font-bold flex items-center justify-center">
-                    1
-                </button>
-                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
-                    &rsaquo;
-                </button>
-                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
-                    &raquo;
-                </button>
-            </div>
+           
         </div>
     )
 }
