@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
     const selectClassFilter = searchParams.get('selectClassFilter')
 
     console.log("selectClassFilter: ", selectClassFilter);
-    
+    // CURRENTLY NAG ERROR PA KAY ANG EVALUATIONS AND GRADING LOGS KAY WALA PA NA CREATE
 
     try {
         const essays = await getEssays(selectClassFilter)

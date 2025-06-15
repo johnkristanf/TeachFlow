@@ -4,9 +4,8 @@ import { db } from '@/database'
 import { rubrics, criteria, levels } from '@/database/schema'
 import { Levels } from '@/types/rubrics'
 
-export async function PUT(req: NextRequest) {
-    const url = new URL(req.url)
-    const rubricID = Number(url.pathname.split('/').pop())
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+    const rubricID = Number(params.id)
 
     if (isNaN(rubricID)) {
         return NextResponse.json(
