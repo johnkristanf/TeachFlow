@@ -1,32 +1,46 @@
 // app/api/classes/route.ts
-import { NextResponse } from 'next/server'
-import { z } from 'zod' // Import z from zod
+import { NextResponse, NextRequest } from 'next/server'
 import { db } from '@/database'
 import { classes, essay } from '@/database/schema'
 import { sql } from 'drizzle-orm'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        const allClasses = await db
-            .select({
-                id: classes.id,
-                name: classes.name,
-                description: classes.description,
-                studentCount: classes.studentCount,
-                createdAt: classes.createdAt,
-                essayCount: sql<number>`cast(count(${essay.id}) as int)`.as(
-                    'essay_count'
-                ),
-            })
-            .from(classes)
-            .leftJoin(essay, sql`${classes.id} = ${essay.classId}`) // LEFT JOIN to include classes even if they have no essays
-            .groupBy(
-                classes.id,
-                classes.name,
-                classes.description,
-                classes.studentCount,
-                classes.createdAt
-            )
+        const { searchParams } = new URL(req.url)
+        const component = searchParams.get('component') 
+
+        let allClasses
+
+        if (component === 'dropdown') {
+            allClasses = await db
+                .select({
+                    id: classes.id,
+                    name: classes.name,
+                })
+                .from(classes)
+        } else {
+            // Default behavior: Fetch all details including essay count
+            allClasses = await db
+                .select({
+                    id: classes.id,
+                    name: classes.name,
+                    description: classes.description,
+                    studentCount: classes.studentCount,
+                    createdAt: classes.createdAt,
+                    essayCount: sql<number>`cast(count(${essay.id}) as int)`.as(
+                        'essay_count'
+                    ),
+                })
+                .from(classes)
+                .leftJoin(essay, sql`${classes.id} = ${essay.classId}`) // LEFT JOIN to include classes even if they have no essays
+                .groupBy(
+                    classes.id,
+                    classes.name,
+                    classes.description,
+                    classes.studentCount,
+                    classes.createdAt
+                )
+        }
         return NextResponse.json(allClasses, { status: 200 })
     } catch (error) {
         console.error('Error fetching classes:', error)

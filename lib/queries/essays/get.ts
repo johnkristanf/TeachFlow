@@ -1,6 +1,12 @@
 import { db } from '@/database'
 
-export async function getEssays() {
+export async function getEssays(selectClassFilter: string | null) {
+    const parsedFilter = Number(selectClassFilter)
+    const whereClause =
+        selectClassFilter && !isNaN(parsedFilter)
+            ? `WHERE e.class_id = ${parsedFilter}`
+            : ''
+            
     const result = await db.execute(`
 
         WITH LatestGradingLog AS (
@@ -24,6 +30,7 @@ export async function getEssays() {
             e.essay_text,
             e.status,
             e.created_at,
+            c.name AS class_name,
             to_jsonb(es) - 'essay_id' AS summary,
 
             COALESCE(
@@ -72,11 +79,13 @@ export async function getEssays() {
         LEFT JOIN essay_summaries es ON e.id = es.essay_id
         LEFT JOIN LatestGradingLog lgl ON e.id = lgl.essay_id AND lgl.rn = 1 
         LEFT JOIN rubrics r ON e.rubric_id = r.id
-        GROUP BY e.id, es.id, r.id, lgl.id, lgl.logged_at, lgl.failure_type, lgl.error_message, lgl.error_details 
+        LEFT JOIN classes c ON e.class_id = c.id
+
+        ${whereClause}
+        GROUP BY e.id, es.id, r.id, lgl.id, c.name, lgl.logged_at, lgl.failure_type, lgl.error_message, lgl.error_details 
         ORDER BY e.created_at DESC;
     `)
 
     // Return an array of rows (objects)
     return result.rows
 }
-

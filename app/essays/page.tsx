@@ -2,31 +2,39 @@
 
 import { PrimaryButton } from '@/components/ui/primary-button'
 
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+
 import { EssayGradingForm } from '@/components/essays/grading-form'
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { columns } from './columns'
 import { DataTable } from '@/components/data-table'
 import { EssayWithEvalSummary } from '@/types/essay'
+import { Classes } from '@/types/classes'
 
 export default function EssayPage() {
     const [openDialog, setOpenDialog] = useState<boolean>(false)
     const [timer, setTimer] = useState<number>(30) // countdown in seconds
     const [pollingInterval, setPollingInterval] = useState<false | number>(false)
     const [hasPendingStatus, setHasPendingStatus] = useState<boolean>(false)
+    const [selectClassFilter, setSelectClassFilter] = useState<number | null>(null)
 
+    console.log('selectClassFilter: ', selectClassFilter)
+
+    // FETCH ESSAYS
     const { data = [], isLoading } = useQuery<EssayWithEvalSummary[], Error>({
-        queryKey: ['essays'],
+        queryKey: ['essays', selectClassFilter],
         queryFn: async () => {
-            const res = await fetch('/api/essay')
+            const res = await fetch(`/api/essay?selectClassFilter=${selectClassFilter}`)
             if (!res.ok) {
                 throw new Error('Failed to fetch essays')
             }
@@ -62,6 +70,28 @@ export default function EssayPage() {
         }
     }, [data])
 
+    console.log('data: ', data)
+
+    // CLASSES
+    const {
+        data: classes,
+        isLoading: isClassesLoading,
+        isError: isClassesError,
+        error: classesError,
+    } = useQuery<Classes[], Error>({
+        queryKey: ['essay_class_filter'], // Unique key for full class data
+        queryFn: async () => {
+            const response = await fetch('/api/classes?component=dropdown')
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to fetch classes with projection')
+            }
+
+            return data
+        },
+    })
+
     return (
         <div className="mt-5">
             <div className="flex justify-between items-center">
@@ -79,11 +109,56 @@ export default function EssayPage() {
                 </Dialog>
             </div>
 
+            {/* NEXT UPDATE TIMER COUNT DOWN */}
             {data && hasPendingStatus && (
                 <div className="mb-3 text-gray-600 font-medium">
                     Next Update in {timer} second{timer !== 1 ? 's' : ''}
                 </div>
             )}
+
+
+            {/* CLASS FILTER DROPDOWN */}
+            <Select
+                value={selectClassFilter === null ? '' : selectClassFilter.toString()}
+                onValueChange={(value) => {
+                    // Update the classId in your formData state
+                    setSelectClassFilter(() =>
+                        value === 'all_class' || value === '' ? null : Number(value)
+                    )
+                }}
+            >
+                <SelectTrigger className="mb-3">
+                    <SelectValue placeholder="Filter by class" />
+                </SelectTrigger>
+                <SelectContent>
+                    {isClassesLoading && (
+                        <SelectItem value="loading" disabled>
+                            Loading classes...
+                        </SelectItem>
+                    )}
+                    {isClassesError && (
+                        <SelectItem value="error" disabled className="text-red-500">
+                            Error: {classesError?.message || 'Failed to load classes'}
+                        </SelectItem>
+                    )}
+                    {!isClassesLoading && !isClassesError && (
+                        <SelectGroup>
+                            <SelectItem value={'all_class'}>All Classes</SelectItem>
+
+                            {classes &&
+                                classes.length > 0 &&
+                                classes.map((cls) => (
+                                    <SelectItem
+                                        key={cls.id}
+                                        value={cls.id?.toString() ?? ''}
+                                    >
+                                        {cls.name}
+                                    </SelectItem>
+                                ))}
+                        </SelectGroup>
+                    )}
+                </SelectContent>
+            </Select>
 
             <DataTable columns={columns} data={data ?? []} isLoading={isLoading} />
         </div>

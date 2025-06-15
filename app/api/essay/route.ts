@@ -1,4 +1,3 @@
-import { enchanceImage } from '@/lib/enchancer/image_enchancer'
 import { extractTextFromImage } from '@/lib/aws-textract/extract'
 import { getEssays } from '@/lib/queries/essays/get'
 import { createEssay } from '@/lib/queries/essays/post'
@@ -9,7 +8,6 @@ import { getFileExtension } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData()
-
     const files = formData.getAll('files')
 
     // Get other form data fields
@@ -18,6 +16,7 @@ export async function POST(req: NextRequest) {
     const gradeLevel = formData.get('grade_level') as string
     const gradeIntensity = formData.get('grade_intensity') as string
     const rubricCriteria = formData.get('rubric_criteria') as string
+    const classID = formData.get('class_id')
     const gradingMethod = formData.get('gradingMethod') as string
 
     console.log('Form Fields:')
@@ -27,6 +26,11 @@ export async function POST(req: NextRequest) {
     console.log('- grade_intensity:', gradeIntensity)
     console.log('- gradingMethod:', gradingMethod)
     console.log('- rubric_criteria:', rubricCriteria)
+
+    let processedClassID: number | null = null
+    if (classID !== null && classID !== '') {
+        processedClassID = Number(classID)
+    }
 
     for (const file of files) {
         if (file instanceof File) {
@@ -58,6 +62,7 @@ export async function POST(req: NextRequest) {
                 const essayData: Essay = {
                     name: fileName,
                     rubricID: Number(rubricID),
+                    classId: processedClassID,
                     sourceType: gradingMethod,
                     essayText: extractedText,
                     status: 'pending',
@@ -75,12 +80,8 @@ export async function POST(req: NextRequest) {
                     grade_intensity: gradeIntensity,
                     rubric_criteria: JSON.parse(rubricCriteria),
                 })
-
             } catch (error) {
-                console.error(
-                    `Failed to extract text from ${file.name}:`,
-                    error
-                )
+                console.error(`Failed to extract text from ${file.name}:`, error)
             }
         }
     }
@@ -90,9 +91,15 @@ export async function POST(req: NextRequest) {
     })
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url)
+    const selectClassFilter = searchParams.get('selectClassFilter')
+
+    console.log("selectClassFilter: ", selectClassFilter);
+    
+
     try {
-        const essays = await getEssays()
+        const essays = await getEssays(selectClassFilter)
         return NextResponse.json(essays)
     } catch (error) {
         console.error(`Failed to get essays:`, error)
