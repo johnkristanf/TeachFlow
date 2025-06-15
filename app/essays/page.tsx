@@ -65,11 +65,11 @@ export default function EssayPage() {
     return (
         <div className="mt-5">
             <div className="flex justify-between items-center">
-                <h1 className="text-4xl text-blue-500 mb-5">Essays</h1>
+                <h1 className="text-4xl font-bold text-blue-600 mb-5">Essays</h1>
 
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                     <DialogTrigger asChild>
-                        <PrimaryButton color="blue" variant="outline">
+                        <PrimaryButton color="blue" variant="solid">
                             Grade New Essay
                         </PrimaryButton>
                     </DialogTrigger>

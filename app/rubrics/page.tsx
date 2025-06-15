@@ -22,7 +22,7 @@ export default function RubricsPage() {
     return (
         <div className="mt-5">
             <div className="flex justify-between items-center">
-                <h1 className="text-4xl text-blue-500">Rubrics</h1>
+                <h1 className="text-4xl font-bold text-blue-600">Rubrics</h1>
 
                 <div className="flex flex-col items-center gap-1 mb-5">
                     <h1 className="text-semibold">Create Rubrics:</h1>
@@ -32,7 +32,7 @@ export default function RubricsPage() {
 
                         <BuildWithAI />
 
-                        <PrimaryButton color="blue" variant="outline">
+                        <PrimaryButton color="blue" variant="solid">
                             Use Template
                         </PrimaryButton>
                     </div>
