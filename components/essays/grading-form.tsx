@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { RadioGroupItem, RadioGroup } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
 import { PrimaryButton } from '../ui/primary-button'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import {
     Drawer,
@@ -13,18 +13,31 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from '@/components/ui/drawer'
-import RubricTypeTabs from '../rubrics/rubric-type-tabs'
-import { useRubricStore } from '@/store/useStoreRubric'
-import { convertBase64ToFile, formatFileSize } from '@/lib/utils'
-import { Criteria } from '@/types/rubrics'
-import { SkeletonLoader } from '../skeleton-loading'
-import { FileUp, Info, RotateCw } from 'lucide-react'
-import { DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
+
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+
+import RubricTypeTabs from '../rubrics/rubric-type-tabs'
+import { useRubricStore } from '@/store/useStoreRubric'
+import { convertBase64ToFile, formatFileSize } from '@/lib/utils'
+import { Criteria } from '@/types/rubrics'
+import { SkeletonLoader } from '../skeleton-loading'
+import { FileUp, InfoIcon, RotateCw } from 'lucide-react'
+import { DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
+
+import { Classes } from '@/types/classes'
 type EssayGradingFormProps = {
     onCloseDialog?: () => void
 }
@@ -41,6 +54,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         gradingMethod: 'files',
         files: [] as File[],
         capturedImages: [] as string[], // Base64 images from webcam
+        classId: null as number | null,
     })
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,6 +249,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
             return
         }
 
+        console.log('class ID: ', formData.classId)
         const submitData = new FormData()
         submitData.append('rubric_id', selectedRubric.id.toString())
         submitData.append('rubric_category', selectedRubric.category)
@@ -244,6 +259,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
             'rubric_criteria',
             JSON.stringify(formData.rubric_criteria)
         )
+        submitData.append('class_id', formData.classId?.toString() ?? '')
         submitData.append('gradingMethod', formData.gradingMethod)
 
         if (formData.gradingMethod === 'files' && formData.files) {
@@ -259,8 +275,9 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
         console.log('Submit Data:', Array.from(submitData.entries()))
         if (webcamActive && formData.gradingMethod == 'webcam') {
-            stopWebcam()
+            stopWebcam();
         }
+
         gradeEssayMutation.mutate(submitData)
     }
 
@@ -278,6 +295,29 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         }
     }, [])
 
+    // CLASSSES
+    const {
+        data: classes,
+        isLoading: isClassesLoading,
+        isError: isClassesError,
+        error: classesError,
+    } = useQuery<Classes[], Error>({
+        queryKey: ['classes_dropdown'], // Unique key for full class data
+        queryFn: async () => {
+            const response = await fetch('/api/classes?component=dropdown')
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Failed to fetch classes with projection'
+                )
+            }
+
+            return data
+        },
+    })
+
+
     return (
         <div>
             {gradeEssayMutation.isPending ? (
@@ -293,6 +333,85 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="flex flex-col space-y-3 bg-gray-100 p-3 rounded-md mt-5">
+                            <div className="flex items-center gap-1">
+                                <label className="text-base font-medium">
+                                    Classes
+                                </label>
+
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        {' '}
+                                        <InfoIcon className="size-4" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Optional. Use to organize essays.</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </div>
+
+                            <Select
+                                value={
+                                    formData.classId === null
+                                        ? ''
+                                        : formData.classId.toString()
+                                }
+                                onValueChange={(value) => {
+                                    // Update the classId in your formData state
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        classId:
+                                            value === 'skip_class' ||
+                                            value === ''
+                                                ? null
+                                                : Number(value),
+                                    }))
+                                }}
+                            >
+                                <SelectTrigger className="w-full focus-visible:ring-blue-500 focus-visible:border-blue-500">
+                                    <SelectValue placeholder="Select a class" />
+                                </SelectTrigger>
+                                <SelectContent className="w-full focus-visible:ring-blue-500 focus-visible:border-blue-500">
+                                    {isClassesLoading && (
+                                        <SelectItem value="loading" disabled>
+                                            Loading classes...
+                                        </SelectItem>
+                                    )}
+                                    {isClassesError && (
+                                        <SelectItem
+                                            value="error"
+                                            disabled
+                                            className="text-red-500"
+                                        >
+                                            Error:{' '}
+                                            {classesError?.message ||
+                                                'Failed to load classes'}
+                                        </SelectItem>
+                                    )}
+                                    {!isClassesLoading && !isClassesError && (
+                                        <SelectGroup>
+                                            <SelectItem value={'skip_class'}>
+                                                Skip selecting class
+                                            </SelectItem>
+
+                                            {classes &&
+                                                classes.length > 0 &&
+                                                classes.map((cls) => (
+                                                    <SelectItem
+                                                        key={cls.id}
+                                                        value={
+                                                            cls.id?.toString() ??
+                                                            ''
+                                                        }
+                                                    >
+                                                        {cls.name}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectGroup>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="space-y-3 bg-gray-100 p-3 rounded-md">
                             <div className="flex items-center justify-between">
                                 <label className="text-base font-medium">
@@ -383,9 +502,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                 )}
                             </div>
                         </div>
-
                         {/* Upload Method */}
-
                         <div className="space-y-3 bg-gray-100 p-3 rounded-md">
                             <label className="text-base font-medium">
                                 Choose essay grading method{' '}
@@ -653,8 +770,8 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
                                                     <div className="flex flex-col">
                                                         <h1 className="text-center text-md font-medium text-blue-600 mb-4">
-                                                            * Please capture your
-                                                            image in good
+                                                            * Please capture
+                                                            your image in good
                                                             lighting, hold your
                                                             device steady, and
                                                             ensure the text is
@@ -788,7 +905,6 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                 </div>
                             )}
                         </div>
-
                         <div className="flex justify-end">
                             <PrimaryButton
                                 type="submit"

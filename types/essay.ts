@@ -3,6 +3,7 @@ import { Rubric } from "./rubrics"
 export type Essay = {
     name?: string
     rubricID: number
+    classId?: number | null
     sourceType: string
     essayText: string
     status: string
@@ -40,6 +41,7 @@ export interface EssayWithEvalSummary {
     source_type: string
     essay_text: string
     status: string
+    class_name: string
     created_at: Date
 
     evaluations: Evaluation[] 
