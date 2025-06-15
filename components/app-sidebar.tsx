@@ -2,9 +2,8 @@
 
 import * as React from 'react'
 import {
-    BookOpenCheck,
-    LifeBuoy,
     PhoneCall,
+    Presentation,
     ScrollText,
     Send,
     Table,
@@ -43,9 +42,9 @@ const data = {
             icon: Table,
         },
         {
-            name: 'DLP Generator',
-            url: '/dlp-generator',
-            icon: BookOpenCheck,
+            name: 'Classes',
+            url: '/classes',
+            icon: Presentation,
         },
     ],
 
