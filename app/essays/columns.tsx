@@ -22,7 +22,12 @@ import {
 import PreviewEvaluation from '@/components/essays/preview-evaluation'
 import RegradeDialog from '@/components/essays/regrade-dialog'
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export type Essay = {
     id: string
@@ -53,6 +58,12 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
     {
         accessorKey: 'name',
         header: 'Essay Name',
+    },
+    
+    {
+        accessorKey: 'class_name',
+        header: 'Class',
+        cell: ({ row }) => row.getValue('class_name') || 'None',
     },
 
     {
@@ -131,7 +142,9 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
                                         <Info className="size-3 text-red-900 font-bold" />
                                     </TooltipTrigger>
                                     <TooltipContent className="max-w-xs break-words">
-                                        <p className="font-semibold mb-1">Grading Failed:</p>
+                                        <p className="font-semibold mb-1">
+                                            Grading Failed:
+                                        </p>
                                         <p>{toolTipMessage}</p>
                                     </TooltipContent>
                                 </Tooltip>
@@ -227,13 +240,13 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
                 gradeLevel: string,
                 gradeIntensity: string
             ) => {
-                console.log("essayID: ", essayID);
-                console.log("essayText: ", essayText);
-                console.log("rubricName: ", rubricName);
-                console.log("rubricCategory: ", rubricCategory);
-                console.log("gradeLevel: ", gradeLevel);
-                console.log("gradeIntensity: ", gradeIntensity);
-                
+                console.log('essayID: ', essayID)
+                console.log('essayText: ', essayText)
+                console.log('rubricName: ', rubricName)
+                console.log('rubricCategory: ', rubricCategory)
+                console.log('gradeLevel: ', gradeLevel)
+                console.log('gradeIntensity: ', gradeIntensity)
+
                 const formData = new FormData()
                 formData.append('essay_id', essayID)
                 formData.append('essay_text', essayText)
@@ -250,15 +263,18 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
                     {essay.status !== 'pending' && (
                         <DropdownMenu>
                             <DropdownMenuTrigger>
-                                <EllipsisVerticalIcon />
+                                <EllipsisVerticalIcon className='hover:cursor-pointer'/>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 {/* PREVIEW DROPDOWN MENU */}
-                                {essay.status !== 'failed' && essay.status !== 'pending' && (
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                        <PreviewEvaluation essay={essay} />
-                                    </DropdownMenuItem>
-                                )}
+                                {essay.status !== 'failed' &&
+                                    essay.status !== 'pending' && (
+                                        <DropdownMenuItem
+                                            onSelect={(e) => e.preventDefault()}
+                                        >
+                                            <PreviewEvaluation essay={essay} />
+                                        </DropdownMenuItem>
+                                    )}
 
                                 {/* REGRADE DROPDOWN MENU */}
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
