@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
             rubric_criteria: rubricCriteria,
         })
 
-        await updateEssayStatus(essayID, 'pending')
+        const parsedEssayID = Number(essayID)
+        await updateEssayStatus(parsedEssayID, 'pending')
 
         return NextResponse.json({ message: 'Submitted for Regrading' })
     } catch (error) {
