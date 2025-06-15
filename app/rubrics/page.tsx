@@ -17,8 +17,6 @@ export default function RubricsPage() {
         },
     })
 
-    console.log('Rubrics Data: ', data)
-
     return (
         <div className="mt-5">
             <div className="flex justify-between items-center mb-5">

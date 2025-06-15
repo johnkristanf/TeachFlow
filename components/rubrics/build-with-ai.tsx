@@ -20,8 +20,6 @@ const BuildWithAI = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false)
 
     const queryClient = useQueryClient()
-    console.log('buildWithAIResponses: ', buildWithAIResponses)
-
     const mutation = useMutation({
         mutationFn: async (data: Rubric) => {
             const res = await fetch('/api/rubrics', {
@@ -39,7 +37,6 @@ const BuildWithAI = () => {
         },
 
         onSuccess: (response) => {
-            console.log('Rubric saved:', response)
             queryClient.invalidateQueries({ queryKey: ['rubrics'] })
             toast.success('Rubric Saved Successfully!')
 

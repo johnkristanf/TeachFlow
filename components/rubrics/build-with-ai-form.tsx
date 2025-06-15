@@ -54,7 +54,6 @@ const BuildWithAIForm = ({
 
         onSuccess: (response) => {
             const parsedResponse = JSON.parse(response)
-            console.log('parsedResponse:', parsedResponse)
             setBuildWithAIResponses(parsedResponse)
         },
 
@@ -65,7 +64,6 @@ const BuildWithAIForm = ({
     })
 
     const onSubmit = (data: BuildWithAIRubricCreate) => {
-        console.log('data rubric: ', data)
         mutation.mutate(data)
     }
 

@@ -28,8 +28,6 @@ export default function EssayPage() {
     const [hasPendingStatus, setHasPendingStatus] = useState<boolean>(false)
     const [selectClassFilter, setSelectClassFilter] = useState<number | null>(null)
 
-    console.log('selectClassFilter: ', selectClassFilter)
-
     // FETCH ESSAYS
     const { data = [], isLoading } = useQuery<EssayWithEvalSummary[], Error>({
         queryKey: ['essays', selectClassFilter],
@@ -69,8 +67,6 @@ export default function EssayPage() {
             setHasPendingStatus(false)
         }
     }, [data])
-
-    console.log('data: ', data)
 
     // CLASSES
     const {
