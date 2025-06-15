@@ -3,12 +3,19 @@
 import DeleteRubric from '@/components/rubrics/delete-rubric'
 import EditRubric from '@/components/rubrics/edit-rubric'
 import { Badge } from '@/components/ui/badge'
-import { PrimaryButton } from '@/components/ui/primary-button'
 import { Rubric } from '@/types/rubrics'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
 import { toast } from 'sonner'
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { EllipsisVerticalIcon } from 'lucide-react'
 
 export const columns: ColumnDef<Rubric>[] = [
     {
@@ -53,7 +60,8 @@ export const columns: ColumnDef<Rubric>[] = [
             const rubric = row.original
             const queryClient = useQueryClient()
             const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
-            const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false)
+            const [openDeleteDialog, setOpenDeleteDialog] =
+                useState<boolean>(false)
 
             const editRubricMutation = useMutation({
                 mutationFn: async (data: Rubric) => {
@@ -65,7 +73,9 @@ export const columns: ColumnDef<Rubric>[] = [
 
                     if (!res.ok) {
                         const error = await res.json()
-                        throw new Error(error?.message || 'Failed to create rubric')
+                        throw new Error(
+                            error?.message || 'Failed to create rubric'
+                        )
                     }
 
                     return res.json()
@@ -99,7 +109,9 @@ export const columns: ColumnDef<Rubric>[] = [
 
                     if (!res.ok) {
                         const error = await res.json()
-                        throw new Error(error?.message || 'Failed to delete rubric')
+                        throw new Error(
+                            error?.message || 'Failed to delete rubric'
+                        )
                     }
 
                     return res.json()
@@ -125,31 +137,39 @@ export const columns: ColumnDef<Rubric>[] = [
             })
 
             const handleEditRubric = (data: Rubric) => {
-                console.log('Edit rubric data: ', data)
                 editRubricMutation.mutate(data)
             }
 
             const handleDeleteRubric = () => {
-                console.log('sdfsdf')
                 deleteRubricMutation.mutate(rubric.id)
             }
 
             return (
                 <div className="flex items-center gap-3">
-                    <EditRubric
-                        data={rubric}
-                        onSubmit={handleEditRubric}
-                        isPending={editRubricMutation.isPending}
-                        openDialog={openEditDialog}
-                        setOpenDialog={setOpenEditDialog}
-                    />
-
-                    <DeleteRubric
-                        onDelete={handleDeleteRubric}
-                        isPending={deleteRubricMutation.isPending}
-                        openDialog={openDeleteDialog}
-                        setOpenDialog={setOpenDeleteDialog}
-                    />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <EllipsisVerticalIcon />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <EditRubric
+                                    data={rubric}
+                                    onSubmit={handleEditRubric}
+                                    isPending={editRubricMutation.isPending}
+                                    openDialog={openEditDialog}
+                                    setOpenDialog={setOpenEditDialog}
+                                />
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <DeleteRubric
+                                    onDelete={handleDeleteRubric}
+                                    isPending={deleteRubricMutation.isPending}
+                                    openDialog={openDeleteDialog}
+                                    setOpenDialog={setOpenDeleteDialog}
+                                />
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             )
         },

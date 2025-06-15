@@ -68,7 +68,7 @@ const EditableAIRubricForm = ({
                 <div className="flex justify-end">
                     <PrimaryButton
                         type="submit"
-                        variant="solid"
+                        variant="outline"
                         color="blue"
                         size="md"
                         className="mt-4"
