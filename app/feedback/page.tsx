@@ -26,6 +26,7 @@ export default function FeedbackForm() {
         watch,
         setValue,
         formState: { errors },
+        reset,
     } = useForm<FeedbackData>()
 
     const rating = watch('rating', 0)
@@ -47,7 +48,10 @@ export default function FeedbackForm() {
             return res.json()
         },
 
-        onSuccess: () => toast.success('Feedback submitted successfully!'),
+        onSuccess: () => {
+            toast.success('Feedback submitted successfully!')
+            reset()
+        },
         onError: (error) => {
             console.error('Error in submitting feedback: ', error)
             toast.error('Failed to submit feedback. Please try again.')
@@ -68,8 +72,7 @@ export default function FeedbackForm() {
 
                 <p className="text-gray-400 text-sm">
                     - We genuinely value your honest feedback — the more real, the better.{' '}
-                    <br />
-                    - Don’t hesitate to be critical if something isn’t working well.{' '}
+                    <br />- Don’t hesitate to be critical if something isn’t working well.{' '}
                     <br />
                 </p>
             </div>
