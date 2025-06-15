@@ -21,22 +21,16 @@ export default function RubricsPage() {
 
     return (
         <div className="mt-5">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-5">
                 <h1 className="text-4xl font-bold text-blue-600">Rubrics</h1>
 
-                <div className="flex flex-col items-center gap-1 mb-5">
-                    <h1 className="text-semibold">Create Rubrics:</h1>
+                {/* <StartScratchRubric /> */}
 
-                    <div className="flex items-center gap-2">
-                        {/* <StartScratchRubric /> */}
+                <BuildWithAI />
 
-                        <BuildWithAI />
-
-                        <PrimaryButton color="blue" variant="solid">
+                {/* <PrimaryButton color="blue" variant="solid">
                             Use Template
-                        </PrimaryButton>
-                    </div>
-                </div>
+                        </PrimaryButton> */}
             </div>
 
             <DataTable columns={columns} data={data ?? []} isLoading={isLoading} />
