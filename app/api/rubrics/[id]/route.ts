@@ -4,12 +4,13 @@ import { db } from '@/database'
 import { rubrics, criteria, levels } from '@/database/schema'
 import { Levels } from '@/types/rubrics'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-    const rubricID = Number(params.id)
+export async function PUT(req: NextRequest) {
+    const id = req.nextUrl.pathname.split('/').pop()
+    const rubricID = Number(id)
 
     if (isNaN(rubricID)) {
         return NextResponse.json(
-            { success: false, message: 'Invalid ID' },
+            { success: false, message: 'Invalid rubric ID' },
             { status: 400 }
         )
     }
