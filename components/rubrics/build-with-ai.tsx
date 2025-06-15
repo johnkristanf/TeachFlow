@@ -61,7 +61,7 @@ const BuildWithAI = () => {
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger asChild>
-                <PrimaryButton color="blue" variant="outline" onClick={() => setOpenDialog(true)}>
+                <PrimaryButton color="blue" variant="solid" onClick={() => setOpenDialog(true)}>
                     Build with AI
                 </PrimaryButton>
             </DialogTrigger>
