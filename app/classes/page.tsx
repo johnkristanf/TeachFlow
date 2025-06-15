@@ -1,0 +1,129 @@
+'use client'
+import React from 'react'
+import { UsersIcon, File, FileIcon } from 'lucide-react' // Assuming you have Heroicons installed
+import AddNewClassDialog from '@/components/classes/add-new-classes-dialog'
+import { useQuery } from '@tanstack/react-query'
+import { Classes } from '@/types/classes'
+
+export default function ClassesPage() {
+    const {
+        data: classes, // Rename data to classes for clarity
+        isLoading,
+        isError,
+        error,
+    } = useQuery<Classes[], Error>({
+        queryKey: ['classes'], // Unique key for this query
+        queryFn: async (): Promise<Classes[]> => {
+            const response = await fetch('/api/classes')
+            if (!response.ok) {
+                throw new Error('Failed to fetch classes')
+            }
+            return response.json()
+        },
+    })
+
+    if (isLoading) {
+        return (
+            <div className="p-8">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-4xl font-bold text-gray-800">
+                        Classes
+                    </h1>
+                    <AddNewClassDialog />
+                </div>
+                <div className="text-center text-gray-600">
+                    Loading classes...
+                </div>
+            </div>
+        )
+    }
+
+    if (isError) {
+        return (
+            <div className="p-8">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-4xl font-bold text-blue-600">
+                        Classes
+                    </h1>
+                    <AddNewClassDialog />
+                </div>
+                <div className="text-center text-red-500">
+                    Error: {error?.message || 'Failed to load classes.'}
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="p-8">
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-4xl font-bold text-gray-800">Classes</h1>
+                <AddNewClassDialog />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {classes && classes.length > 0 ? (
+                    classes.map((classItem) => (
+                        <div
+                            key={classItem.id} // Use unique ID for key
+                            className="w-64 rounded-lg shadow-md p-6 border border-gray-200"
+                        >
+                            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                {classItem.name}
+                            </h2>
+                            <p className="text-sm text-gray-500 mb-4">
+                                Created on{' '}
+                                {classItem.createdAt
+                                    ? new Date(
+                                          classItem.createdAt
+                                      ).toLocaleString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          hour: 'numeric',
+                                          minute: 'numeric',
+                                      })
+                                    : 'N/A'}
+                            </p>
+                            <div className="flex space-x-4 text-gray-600 text-sm">
+                                <div className="flex items-center space-x-1">
+                                    <UsersIcon className="h-4 w-4" />
+                                    <span>
+                                        {classItem.studentCount} students
+                                    </span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                    {/* Assuming 0 essays for now, as it's not in the DB schema */}
+                                    <FileIcon className="h-4 w-4" />
+                                    <span>{classItem.essayCount} essays</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full text-center text-gray-600">
+                        No classes found. Create a new one!
+                    </div>
+                )}
+            </div>
+
+            {/* Pagination (as requested in the original image, kept in case you still need it) */}
+            <div className="flex justify-center items-center mt-12 space-x-1">
+                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
+                    &laquo;
+                </button>
+                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
+                    &lsaquo;
+                </button>
+                <button className="px-4 py-2 rounded-md bg-blue-600 text-white font-bold flex items-center justify-center">
+                    1
+                </button>
+                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
+                    &rsaquo;
+                </button>
+                <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 flex items-center justify-center">
+                    &raquo;
+                </button>
+            </div>
+        </div>
+    )
+}

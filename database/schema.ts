@@ -2,11 +2,9 @@ import {
     pgTable,
     serial,
     text,
-    uuid,
     varchar,
     timestamp,
     integer,
-    pgEnum,
     jsonb,
 } from 'drizzle-orm/pg-core'
 
@@ -46,7 +44,15 @@ export const levels = pgTable('levels', {
 export const essay = pgTable('essay', {
     id: serial('id').primaryKey(),
     name: varchar('name', { length: 255 }),
-    rubricID: integer('rubric_id').references(() => rubrics.id, { onDelete: 'set null' }),
+
+    rubricID: integer('rubric_id').references(() => rubrics.id, {
+        onDelete: 'set null',
+    }),
+
+    classId: integer('class_id').references(() => classes.id, {
+        onDelete: 'set null',
+    }),
+
     sourceType: text('source_type').notNull(), // 'files upload' or 'webcam'
     essayText: text('essay_text').notNull(),
     status: text('status').notNull(),
@@ -75,6 +81,16 @@ export const feedback = pgTable('feedback', {
     suggestions: text('suggestions').notNull(),
     contact: varchar('contact', { length: 255 }),
     easeOfUse: integer('ease_of_use').notNull(),
-    performance: varchar('contact', { length: 255 }),
+    wouldUseAgain: varchar('would_use_again', { length: 255 }).notNull(),
+    willingToPay: varchar('willing_to_pay', { length: 255 }).notNull(),
+    performance: varchar('performance', { length: 255 }),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+})
+
+export const classes = pgTable('classes', {
+    id: serial('id').primaryKey(),
+    name: text('name').notNull(),
+    studentCount: integer('student_count').notNull(),
+    description: text('description'),
+    createdAt: timestamp('created_at').defaultNow(),
 })
