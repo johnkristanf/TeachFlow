@@ -2,18 +2,11 @@
 
 import { Badge } from '@/components/ui/badge'
 import { ColumnDef } from '@tanstack/react-table'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
+
 import { useState } from 'react'
-import { PrimaryButton } from '@/components/ui/primary-button'
 import { EssayWithEvalSummary } from '@/types/essay'
 
-import { EllipsisVertical, Info, Loader2 } from 'lucide-react'
+import { EllipsisVerticalIcon, Info, Loader2 } from 'lucide-react'
 import DeleteEssay from '@/components/essays/delete-essay'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -257,7 +250,7 @@ export const columns: ColumnDef<EssayWithEvalSummary>[] = [
                     {essay.status !== 'pending' && (
                         <DropdownMenu>
                             <DropdownMenuTrigger>
-                                <EllipsisVertical />
+                                <EllipsisVerticalIcon />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 {/* PREVIEW DROPDOWN MENU */}
