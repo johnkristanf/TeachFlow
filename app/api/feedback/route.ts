@@ -8,19 +8,18 @@ export async function POST(req: NextRequest) {
     try {
         const data = await req.json()
 
-        // Validate minimal required fields (optional: use Zod or similar in prod)
-        const { rating, liked, bugs, confusing, suggestions, contact, easeOfUse, performance } =
-            data
 
         await db.insert(feedback).values({
-            rating,
-            liked,
-            bugs,
-            confusing,
-            suggestions,
-            contact,
-            easeOfUse,
-            performance,
+            rating: data.rating,
+            liked: data.liked,
+            bugs: data.bugs,
+            confusing: data.confusing,
+            suggestions: data.suggestions,
+            contact: data.contact,
+            easeOfUse: data.easeOfUse,
+            performance: data.performance,
+            willingToPay: data.willingToPay,
+            wouldUseAgain: data.wouldUseAgain
         })
 
         return NextResponse.json({ message: 'Feedback saved' }, { status: 201 })
