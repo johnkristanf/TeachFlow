@@ -19,7 +19,11 @@ const CrtiterionItem = ({ control, register, index, remove }: any) => {
                     placeholder="Criteria Title - for example, Evidence"
                     className="w-full border px-2 py-1 rounded"
                 />
-                <button type="button" onClick={() => remove(index)} className="text-red-500">
+                <button
+                    type="button"
+                    onClick={() => remove(index)}
+                    className="text-red-500"
+                >
                     <Trash2Icon size={18} />
                 </button>
             </div>

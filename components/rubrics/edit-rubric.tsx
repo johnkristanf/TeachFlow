@@ -16,14 +16,9 @@ import {
     DialogClose,
 } from '@/components/ui/dialog'
 
-import {
-    essay_categories,
-    grade,
-    intensities,
-    languages,
-} from '@/constants/rubrics'
+import { essay_categories, grade, intensities, languages } from '@/constants/rubrics'
 import { SkeletonLoader } from '../skeleton-loading'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 
 const EditRubric = ({
     data,
@@ -53,8 +48,13 @@ const EditRubric = ({
 
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger>Edit Rubric</DialogTrigger>
-
+            <PrimaryButton
+                onClick={() => setOpenDialog(true)}
+                className="red"
+                variant="outline"
+            >
+                <p className="text-blue-600">Edit</p>
+            </PrimaryButton>
             <DialogContent className="max-h-[600px] w-full md:max-w-4xl overflow-y-auto">
                 {isPending ? (
                     <SkeletonLoader msg="Editing rubric..." />
@@ -64,10 +64,7 @@ const EditRubric = ({
                             <DialogTitle>Preview and Edit Rubric</DialogTitle>
                         </DialogHeader>
 
-                        <form
-                            onSubmit={handleSubmit(onSubmit)}
-                            className="space-y-6"
-                        >
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                             <div>
                                 <label className="font-semibold text-sm">
                                     Rubric Name
@@ -82,16 +79,12 @@ const EditRubric = ({
                                 </label>
                                 <div className="flex gap-2 flex-wrap">
                                     {essay_categories.map((categ) => (
-                                        <label
-                                            key={categ}
-                                            className="cursor-pointer"
-                                        >
+                                        <label key={categ} className="cursor-pointer">
                                             <input
                                                 type="radio"
                                                 value={categ}
                                                 {...register('category', {
-                                                    required:
-                                                        'Category is required',
+                                                    required: 'Category is required',
                                                 })}
                                                 className="peer hidden"
                                             />
@@ -109,16 +102,12 @@ const EditRubric = ({
                                 </label>
                                 <div className="flex gap-2 flex-wrap">
                                     {grade.map((level) => (
-                                        <label
-                                            key={level}
-                                            className="cursor-pointer"
-                                        >
+                                        <label key={level} className="cursor-pointer">
                                             <input
                                                 type="radio"
                                                 value={level}
                                                 {...register('grade', {
-                                                    required:
-                                                        'Grade is required',
+                                                    required: 'Grade is required',
                                                 })}
                                                 className="peer hidden"
                                             />
@@ -137,16 +126,12 @@ const EditRubric = ({
                                 </label>
                                 <div className="flex gap-2 flex-wrap">
                                     {intensities.map(({ label, icon }) => (
-                                        <label
-                                            key={label}
-                                            className="cursor-pointer"
-                                        >
+                                        <label key={label} className="cursor-pointer">
                                             <input
                                                 type="radio"
                                                 value={label}
                                                 {...register('intensity', {
-                                                    required:
-                                                        'Intensity is required',
+                                                    required: 'Intensity is required',
                                                 })}
                                                 className="peer hidden"
                                             />
@@ -173,16 +158,12 @@ const EditRubric = ({
                                 </label>
                                 <div className="flex gap-2 flex-wrap">
                                     {languages.map((lang) => (
-                                        <label
-                                            key={lang}
-                                            className="cursor-pointer"
-                                        >
+                                        <label key={lang} className="cursor-pointer">
                                             <input
                                                 type="radio"
                                                 value={lang}
                                                 {...register('language', {
-                                                    required:
-                                                        'Language is required',
+                                                    required: 'Language is required',
                                                 })}
                                                 className="peer hidden"
                                             />
@@ -226,21 +207,18 @@ const EditRubric = ({
                             </div>
 
                             <DialogFooter className="pt-4">
-                                <DialogClose>
-                                    <PrimaryButton
-                                        type="button"
-                                        color="black"
-                                        variant="outline"
-                                        size="md"
-                                    >
-                                        Cancel
-                                    </PrimaryButton>
-                                </DialogClose>
+                                <PrimaryButton
+                                    type="button"
+                                    color="black"
+                                    variant="outline"
+                                    onClick={() => setOpenDialog(false)}
+                                >
+                                    Cancel
+                                </PrimaryButton>
                                 <PrimaryButton
                                     type="submit"
                                     color="blue"
                                     variant="outline"
-                                    size="md"
                                 >
                                     Save Changes
                                 </PrimaryButton>
