@@ -53,7 +53,7 @@ function DeleteEssay({
                             </DialogClose>
 
                             <PrimaryButton color="red" variant="outline" onClick={onDelete}>
-                                Yes
+                                Yes, Proceed
                             </PrimaryButton>
                         </DialogFooter>
                     </>

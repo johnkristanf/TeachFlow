@@ -26,9 +26,13 @@ function DeleteRubric({
 }) {
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger>
+            <PrimaryButton
+                onClick={() => setOpenDialog(true)}
+                className="red"
+                variant="outline"
+            >
                 <p className="text-red-600">Delete</p>
-            </DialogTrigger>
+            </PrimaryButton>
             <DialogContent>
                 {isPending ? (
                     <SkeletonLoader msg="Deleting Rubric..." />
@@ -40,19 +44,25 @@ function DeleteRubric({
                                 Are you absolutely sure?
                             </DialogTitle>
                             <DialogDescription>
-                                This action cannot be undone. This will permanently delete your
-                                account and remove your data from our servers.
+                                This action cannot be undone. This will permanently delete
+                                your account and remove your data from our servers.
                             </DialogDescription>
                         </DialogHeader>
 
                         <DialogFooter>
-                            <DialogClose>
-                                <PrimaryButton color="black" variant="outline">
-                                    Cancel
-                                </PrimaryButton>
-                            </DialogClose>
+                            <PrimaryButton
+                                color="black"
+                                variant="outline"
+                                onClick={() => setOpenDialog(false)}
+                            >
+                                Cancel
+                            </PrimaryButton>
 
-                            <PrimaryButton color="red" variant="outline" onClick={onDelete}>
+                            <PrimaryButton
+                                color="red"
+                                variant="outline"
+                                onClick={onDelete}
+                            >
                                 Yes, Proceed
                             </PrimaryButton>
                         </DialogFooter>
