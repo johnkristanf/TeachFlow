@@ -77,18 +77,18 @@ export default function AddNewClassDialog() {
 
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            {createClassMutation.isPending ? (
-                <SkeletonLoader msg="Creating Class..." />
-            ) : (
-                <>
-                    <DialogTrigger asChild>
-                        <PrimaryButton color="blue" variant="solid">
-                            {' '}
-                            {/* Corrected color based on design */}
-                            New class
-                        </PrimaryButton>
-                    </DialogTrigger>
-                    <DialogContent>
+            <DialogTrigger asChild>
+                <PrimaryButton color="blue" variant="solid">
+                    {' '}
+                    {/* Corrected color based on design */}
+                    New class
+                </PrimaryButton>
+            </DialogTrigger>
+            <DialogContent>
+                {createClassMutation.isPending ? (
+                    <SkeletonLoader msg="Creating Class..." />
+                ) : (
+                    <>
                         <DialogHeader>
                             <DialogTitle className="text-2xl font-semibold text-gray-800">
                                 New class
@@ -108,8 +108,7 @@ export default function AddNewClassDialog() {
                                         htmlFor="name"
                                         className="text-gray-800 text-base font-medium"
                                     >
-                                        Class name{' '}
-                                        <span className="text-red-500">*</span>
+                                        Class name <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         id="name"
@@ -192,9 +191,9 @@ export default function AddNewClassDialog() {
                                 </PrimaryButton>
                             </DialogFooter>
                         </form>
-                    </DialogContent>
-                </>
-            )}
+                    </>
+                )}
+            </DialogContent>
         </Dialog>
     )
 }
