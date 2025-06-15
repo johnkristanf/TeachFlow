@@ -1,9 +1,11 @@
-import { extractTextFromImage } from '@/lib/google-vision/extract'
+import { enchanceImage } from '@/lib/enchancer/image_enchancer'
+import { extractTextFromImage } from '@/lib/aws-textract/extract'
 import { getEssays } from '@/lib/queries/essays/get'
 import { createEssay } from '@/lib/queries/essays/post'
 import { publishToQueue } from '@/lib/rabbitmq/publisher'
 import { Essay } from '@/types/essay'
 import { NextRequest, NextResponse } from 'next/server'
+import { getFileExtension } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData()
@@ -23,19 +25,38 @@ export async function POST(req: NextRequest) {
     console.log('- rubric_category:', rubricCategory)
     console.log('- grade_level:', gradeLevel)
     console.log('- grade_intensity:', gradeIntensity)
-    console.log('- rubric_criteria:', rubricCriteria)
     console.log('- gradingMethod:', gradingMethod)
+    console.log('- rubric_criteria:', rubricCriteria)
 
     for (const file of files) {
         if (file instanceof File) {
-            console.log(`Processing file: ${file.name} (${file.size} bytes, ${file.type})`)
-
             try {
+                const fileName = file.name
+                const mimeType = file.type
+                const fileExt = getFileExtension(fileName)
                 const buffer = Buffer.from(await file.arrayBuffer())
-                const extractedText = await extractTextFromImage(buffer)
+
+                console.log('fileName: ', fileName)
+                console.log('mimeType: ', mimeType)
+                console.log('fileExt: ', fileExt)
+
+                let extractedText = ''
+
+                // Case 1: Image file
+                if (
+                    mimeType.startsWith('image/') ||
+                    ['.jpg', '.jpeg', '.png'].includes(fileExt)
+                ) {
+                    extractedText = await extractTextFromImage(buffer)
+                }
+
+                // Case 2: PDF
+                // if (fileExt === '.pdf' || mimeType === 'application/pdf') {
+                //     extractedText = await extractTextFromPDF(buffer)
+                // }
 
                 const essayData: Essay = {
-                    name: file.name,
+                    name: fileName,
                     rubricID: Number(rubricID),
                     sourceType: gradingMethod,
                     essayText: extractedText,
@@ -54,8 +75,12 @@ export async function POST(req: NextRequest) {
                     grade_intensity: gradeIntensity,
                     rubric_criteria: JSON.parse(rubricCriteria),
                 })
+
             } catch (error) {
-                console.error(`Failed to extract text from ${file.name}:`, error)
+                console.error(
+                    `Failed to extract text from ${file.name}:`,
+                    error
+                )
             }
         }
     }

@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from 'clsx'
+import path from 'path'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
@@ -31,3 +32,5 @@ export const formatFileSize = (bytes: number) => {
 }
 
 export const formatArray = (items: any[]) => (items?.length ? items.join(', ') : 'None')
+
+export const getFileExtension = (fileName: string) => path.extname(fileName).toLowerCase()
