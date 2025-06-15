@@ -4,24 +4,41 @@ import { db } from '@/database'
 import { rubrics, criteria, levels } from '@/database/schema'
 import { Levels } from '@/types/rubrics'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-    const rubricId = parseInt(params.id)
+export async function PUT(req: NextRequest) {
+    const url = new URL(req.url)
+    const rubricID = Number(url.pathname.split('/').pop())
+
+    if (isNaN(rubricID)) {
+        return NextResponse.json(
+            { success: false, message: 'Invalid ID' },
+            { status: 400 }
+        )
+    }
+
     const body = await req.json()
 
-    const { name, grade, intensity, category, language, created_by, criteria: criteriaData } = body
+    const {
+        name,
+        grade,
+        intensity,
+        category,
+        language,
+        created_by,
+        criteria: criteriaData,
+    } = body
 
     try {
         // 1. Update rubric
         await db
             .update(rubrics)
             .set({ name, grade, intensity, category, language, created_by })
-            .where(eq(rubrics.id, rubricId))
+            .where(eq(rubrics.id, rubricID))
 
         // 2. Delete old criteria and levels
         const existingCriteria = await db
             .select({ id: criteria.id })
             .from(criteria)
-            .where(eq(criteria.rubricId, rubricId))
+            .where(eq(criteria.rubricId, rubricID))
 
         const criteriaIds = existingCriteria.map((c) => c.id)
 
@@ -35,7 +52,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             const insertedCriterion = await db
                 .insert(criteria)
                 .values({
-                    rubricId,
+                    rubricId: rubricID,
                     title: criterion.title,
                 })
                 .returning({ id: criteria.id })
@@ -55,18 +72,32 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         return NextResponse.json({ success: true })
     } catch (err) {
         console.error('Error updating rubric:', err)
-        return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 })
+        return NextResponse.json(
+            { success: false, error: 'Server error' },
+            { status: 500 }
+        )
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    const rubricId = parseInt(params.id)
+export async function DELETE(req: Request) {
+    const url = new URL(req.url)
+    const rubricID = Number(url.pathname.split('/').pop())
+
+    if (isNaN(rubricID)) {
+        return NextResponse.json(
+            { success: false, message: 'Invalid ID' },
+            { status: 400 }
+        )
+    }
 
     try {
-        await db.delete(rubrics).where(eq(rubrics.id, rubricId))
+        await db.delete(rubrics).where(eq(rubrics.id, rubricID))
         return NextResponse.json({ success: true })
     } catch (err) {
         console.error('Failed to delete rubric:', err)
-        return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 })
+        return NextResponse.json(
+            { success: false, message: 'Server error' },
+            { status: 500 }
+        )
     }
 }

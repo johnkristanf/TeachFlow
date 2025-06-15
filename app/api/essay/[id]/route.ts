@@ -3,8 +3,8 @@ import { essay } from '@/database/schema'
 import { eq, sql } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function DELETE(request: NextRequest) {
-    const url = new URL(request.url)
+export async function DELETE(req: NextRequest) {
+    const url = new URL(req.url)
     const essayID = Number(url.pathname.split('/').pop())
 
     if (isNaN(essayID)) {
@@ -13,7 +13,7 @@ export async function DELETE(request: NextRequest) {
             { status: 400 }
         )
     }
-    
+
     try {
         await db.transaction(async (tx) => {
             await tx.delete(essay).where(eq(essay.id, essayID))
