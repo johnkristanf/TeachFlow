@@ -61,32 +61,28 @@ export default function FeedbackForm() {
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full mx-auto p-6 bg-blue-50  text-blue-900 rounded-xl shadow-lg space-y-6"
+            className="w-full mx-auto p-6 border-l-4 border-blue-400 border rounded-lg space-y-6"
         >
             <div className="flex flex-col">
-                <h1 className="text-3xl font-semibold text-blue-800">
-                    Feedback Form
-                </h1>
+                <h1 className="text-4xl font-bold text-blue-600">Feedback Form</h1>
+
                 <p className="text-gray-400 text-sm">
-                    - We genuinely value your honest feedback — the more real,
-                    the better. <br />
-                    - Don’t hesitate to be critical if something isn’t working
-                    well. <br />
+                    - We genuinely value your honest feedback — the more real, the better.{' '}
+                    <br />
+                    - Don’t hesitate to be critical if something isn’t working well.{' '}
+                    <br />
                 </p>
             </div>
 
             {/* Ease of Use */}
             <div>
                 <label className="block text-sm font-medium mb-1">
-                    How easy was it to navigate and use the system? (1 = very
-                    hard, 5 = very easy)
+                    How easy was it to navigate and use the system? (1 = very hard, 5 =
+                    very easy)
                 </label>
                 <div className="flex space-x-2">
                     {[1, 2, 3, 4, 5].map((val) => (
-                        <label
-                            key={val}
-                            className="flex items-center space-x-1 text-sm"
-                        >
+                        <label key={val} className="flex items-center space-x-1 text-sm">
                             <input
                                 type="radio"
                                 value={val}
@@ -97,9 +93,7 @@ export default function FeedbackForm() {
                     ))}
                 </div>
                 {errors.easeOfUse && (
-                    <p className="text-red-600 text-sm">
-                        Please select a value
-                    </p>
+                    <p className="text-red-600 text-sm">Please select a value</p>
                 )}
             </div>
 
@@ -126,11 +120,7 @@ export default function FeedbackForm() {
                         <span>Acceptable</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                        <input
-                            type="radio"
-                            value="slow"
-                            {...register('performance')}
-                        />
+                        <input type="radio" value="slow" {...register('performance')} />
                         <span>Slow or laggy</span>
                     </label>
                 </div>
@@ -151,9 +141,7 @@ export default function FeedbackForm() {
                     className="w-full p-2 rounded-md border border-blue-200 bg-white"
                 />
                 {errors.liked && (
-                    <p className="text-red-600 text-sm">
-                        This field is required
-                    </p>
+                    <p className="text-red-600 text-sm">This field is required</p>
                 )}
             </div>
 
@@ -232,11 +220,7 @@ export default function FeedbackForm() {
                         <span>Maybe</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                        <input
-                            type="radio"
-                            value="no"
-                            {...register('wouldUseAgain')}
-                        />
+                        <input type="radio" value="no" {...register('wouldUseAgain')} />
                         <span>No</span>
                     </label>
                 </div>
@@ -260,19 +244,11 @@ export default function FeedbackForm() {
                         <span>Yes</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                        <input
-                            type="radio"
-                            value="maybe"
-                            {...register('willingToPay')}
-                        />
+                        <input type="radio" value="maybe" {...register('willingToPay')} />
                         <span>Maybe (Depends on the pricing)</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                        <input
-                            type="radio"
-                            value="no"
-                            {...register('willingToPay')}
-                        />
+                        <input type="radio" value="no" {...register('willingToPay')} />
                         <span>No</span>
                     </label>
                 </div>
@@ -294,9 +270,7 @@ export default function FeedbackForm() {
                             onClick={() => setValue('rating', value)}
                             className={clsx(
                                 'p-1',
-                                rating >= value
-                                    ? 'text-yellow-400'
-                                    : 'text-blue-300'
+                                rating >= value ? 'text-yellow-400' : 'text-blue-300'
                             )}
                         >
                             <Star
@@ -309,10 +283,7 @@ export default function FeedbackForm() {
                 {errors.rating && (
                     <p className="text-red-600 text-sm">Rating is required</p>
                 )}
-                <input
-                    type="hidden"
-                    {...register('rating', { required: true })}
-                />
+                <input type="hidden" {...register('rating', { required: true })} />
             </div>
 
             {/* Submit */}
