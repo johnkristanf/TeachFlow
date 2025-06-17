@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
             { message: 'Internal server error.' },
             { status: 500 }
         )
-    }
+    } 
 }
 
 // POST handler to create a new class
