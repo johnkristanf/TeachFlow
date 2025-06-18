@@ -26,14 +26,10 @@ export default function ClassesPage() {
         return (
             <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-4xl font-bold text-gray-800">
-                        Classes
-                    </h1>
+                    <h1 className="text-4xl font-bold text-gray-800">Classes</h1>
                     <AddNewClassDialog />
                 </div>
-                <div className="text-center text-gray-600">
-                    Loading classes...
-                </div>
+                <div className="text-center text-gray-600">Loading classes...</div>
             </div>
         )
     }
@@ -42,9 +38,7 @@ export default function ClassesPage() {
         return (
             <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-4xl font-bold text-blue-600">
-                        Classes
-                    </h1>
+                    <h1 className="text-4xl font-bold text-blue-600">Classes</h1>
                     <AddNewClassDialog />
                 </div>
                 <div className="text-center text-red-500">
@@ -74,27 +68,30 @@ export default function ClassesPage() {
                             <p className="text-sm text-gray-500 mb-4">
                                 Created on{' '}
                                 {classItem.createdAt
-                                    ? new Date(
-                                          classItem.createdAt
-                                      ).toLocaleString('en-US', {
-                                          month: 'short',
-                                          day: 'numeric',
-                                          hour: 'numeric',
-                                          minute: 'numeric',
-                                      })
+                                    ? new Date(classItem.createdAt).toLocaleString(
+                                          'en-US',
+                                          {
+                                              month: 'short',
+                                              day: 'numeric',
+                                              hour: 'numeric',
+                                              minute: 'numeric',
+                                          }
+                                      )
                                     : 'N/A'}
                             </p>
                             <div className="flex space-x-4 text-gray-600 text-sm">
                                 <div className="flex items-center space-x-1">
                                     <UsersIcon className="h-4 w-4" />
-                                    <span>
-                                        {classItem.studentCount} students
-                                    </span>
+                                    <span>{classItem.studentCount} students</span>
                                 </div>
                                 <div className="flex items-center space-x-1">
                                     {/* Assuming 0 essays for now, as it's not in the DB schema */}
                                     <FileIcon className="h-4 w-4" />
-                                    <span>{classItem.essayCount} essays</span>
+                                    <span>
+                                        {classItem.essayCount && classItem.essayCount <= 1
+                                            ? 'essay'
+                                            : 'essays'}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -105,8 +102,6 @@ export default function ClassesPage() {
                     </div>
                 )}
             </div>
-
-           
         </div>
     )
 }
