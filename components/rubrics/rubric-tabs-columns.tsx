@@ -12,17 +12,17 @@ export const rubric_tabs_columns: ColumnDef<Rubric>[] = [
         header: 'Name',
     },
 
-    {
-        accessorKey: 'created_by',
-        header: 'Created By',
-        cell: ({ getValue }) => {
-            const value = getValue() as string
-            const isTeachFlow = value === 'teachflow_rubrics'
-            const label = isTeachFlow ? 'TeachFlow' : 'Me'
-            const color = isTeachFlow ? 'bg-blue-600' : 'bg-yellow-600'
-            return <Badge className={`${color} text-white`}>{label}</Badge>
-        },
-    },
+    // {
+    //     accessorKey: 'created_by',
+    //     header: 'Created By',
+    //     cell: ({ getValue }) => {
+    //         const value = getValue() as string
+    //         const isTeachFlow = value === 'teachflow_rubrics'
+    //         const label = isTeachFlow ? 'TeachFlow' : 'Me'
+    //         const color = isTeachFlow ? 'bg-blue-600' : 'bg-yellow-600'
+    //         return <Badge className={`${color} text-white`}>{label}</Badge>
+    //     },
+    // },
 
     {
         id: 'actions',

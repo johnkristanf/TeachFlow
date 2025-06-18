@@ -14,11 +14,7 @@ import {
     DrawerTrigger,
 } from '@/components/ui/drawer'
 
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import {
     Select,
@@ -31,7 +27,7 @@ import {
 
 import RubricTypeTabs from '../rubrics/rubric-type-tabs'
 import { useRubricStore } from '@/store/useStoreRubric'
-import { convertBase64ToFile, formatFileSize } from '@/lib/utils'
+import { cn, convertBase64ToFile, formatFileSize } from '@/lib/utils'
 import { Criteria } from '@/types/rubrics'
 import { SkeletonLoader } from '../skeleton-loading'
 import { FileUp, InfoIcon, RotateCw } from 'lucide-react'
@@ -100,9 +96,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
     }
 
     const triggerFileInput = () => {
-        const fileInput = document.getElementById(
-            'hidden-file-input'
-        ) as HTMLInputElement
+        const fileInput = document.getElementById('hidden-file-input') as HTMLInputElement
         fileInput?.click()
     }
 
@@ -255,10 +249,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
         submitData.append('rubric_category', selectedRubric.category)
         submitData.append('grade_level', selectedRubric.grade)
         submitData.append('grade_intensity', selectedRubric.intensity)
-        submitData.append(
-            'rubric_criteria',
-            JSON.stringify(formData.rubric_criteria)
-        )
+        submitData.append('rubric_criteria', JSON.stringify(formData.rubric_criteria))
         submitData.append('class_id', formData.classId?.toString() ?? '')
         submitData.append('gradingMethod', formData.gradingMethod)
 
@@ -275,7 +266,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
         console.log('Submit Data:', Array.from(submitData.entries()))
         if (webcamActive && formData.gradingMethod == 'webcam') {
-            stopWebcam();
+            stopWebcam()
         }
 
         gradeEssayMutation.mutate(submitData)
@@ -308,15 +299,12 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
             const data = await response.json()
 
             if (!response.ok) {
-                throw new Error(
-                    data.message || 'Failed to fetch classes with projection'
-                )
+                throw new Error(data.message || 'Failed to fetch classes with projection')
             }
 
             return data
         },
     })
-
 
     return (
         <div>
@@ -327,17 +315,15 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                     <DialogHeader>
                         <DialogTitle>Start Grading</DialogTitle>
                         <DialogDescription>
-                            Please select the assessment attributes to guide the
-                            automated evaluation. The grading process will
-                            proceed based on the criteria you define.
+                            Please select the assessment attributes to guide the automated
+                            evaluation. The grading process will proceed based on the
+                            criteria you define.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="flex flex-col space-y-3 bg-gray-100 p-3 rounded-md mt-5">
                             <div className="flex items-center gap-1">
-                                <label className="text-base font-medium">
-                                    Classes
-                                </label>
+                                <label className="text-base font-medium">Classes</label>
 
                                 <Tooltip>
                                     <TooltipTrigger>
@@ -361,8 +347,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                     setFormData((prev) => ({
                                         ...prev,
                                         classId:
-                                            value === 'skip_class' ||
-                                            value === ''
+                                            value === 'skip_class' || value === ''
                                                 ? null
                                                 : Number(value),
                                     }))
@@ -399,10 +384,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                 classes.map((cls) => (
                                                     <SelectItem
                                                         key={cls.id}
-                                                        value={
-                                                            cls.id?.toString() ??
-                                                            ''
-                                                        }
+                                                        value={cls.id?.toString() ?? ''}
                                                     >
                                                         {cls.name}
                                                     </SelectItem>
@@ -414,9 +396,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                         </div>
                         <div className="space-y-3 bg-gray-100 p-3 rounded-md">
                             <div className="flex items-center justify-between">
-                                <label className="text-base font-medium">
-                                    Rubric
-                                </label>
+                                <label className="text-base font-medium">Rubric</label>
 
                                 <Drawer direction="right">
                                     <DrawerTrigger asChild>
@@ -431,9 +411,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                     </DrawerTrigger>
                                     <DrawerContent>
                                         <DrawerHeader>
-                                            <DrawerTitle>
-                                                Select Rubric
-                                            </DrawerTitle>
+                                            <DrawerTitle>Select Rubric</DrawerTitle>
                                         </DrawerHeader>
 
                                         {/* TABS */}
@@ -562,9 +540,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                                 type="button"
                                                                 onClick={() =>
                                                                     setFormData(
-                                                                        (
-                                                                            prev
-                                                                        ) => ({
+                                                                        (prev) => ({
                                                                             ...prev,
                                                                             files: [],
                                                                         })
@@ -576,14 +552,9 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                         </div>
                                                         <div className="flex items-center space-x-4">
                                                             <span className="text-sm text-gray-600">
-                                                                {
-                                                                    formData
-                                                                        .files
-                                                                        .length
-                                                                }{' '}
+                                                                {formData.files.length}{' '}
                                                                 file
-                                                                {formData.files
-                                                                    .length !==
+                                                                {formData.files.length !==
                                                                 1
                                                                     ? 's'
                                                                     : ''}{' '}
@@ -591,14 +562,10 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                             </span>
                                                             <h1
                                                                 className=" text-blue-600 hover:underline hover:cursor-pointer"
-                                                                onClick={
-                                                                    triggerFileInput
-                                                                }
+                                                                onClick={triggerFileInput}
                                                             >
                                                                 <span>+</span>
-                                                                <span>
-                                                                    Add more
-                                                                </span>
+                                                                <span>Add more</span>
                                                             </h1>
                                                         </div>
                                                     </div>
@@ -610,12 +577,11 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                                     file.type.startsWith(
                                                                         'image/'
                                                                     )
-                                                                const previewUrl =
-                                                                    isImage
-                                                                        ? URL.createObjectURL(
-                                                                              file
-                                                                          )
-                                                                        : null
+                                                                const previewUrl = isImage
+                                                                    ? URL.createObjectURL(
+                                                                          file
+                                                                      )
+                                                                    : null
 
                                                                 return (
                                                                     <div
@@ -691,9 +657,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                             Drop files here,{' '}
                                                             <button
                                                                 type="button"
-                                                                onClick={
-                                                                    triggerFileInput
-                                                                }
+                                                                onClick={triggerFileInput}
                                                                 className="text-blue-600 underline hover:text-blue-800"
                                                             >
                                                                 browse files
@@ -750,15 +714,12 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                         📷
                                                     </div>
                                                     <p className="text-gray-600 mb-4">
-                                                        Start your webcam to
-                                                        capture essay images
-                                                        continuously
+                                                        Start your webcam to capture essay
+                                                        images continuously
                                                     </p>
                                                     <PrimaryButton
                                                         type="button"
-                                                        onClick={() =>
-                                                            startWebcam()
-                                                        } // Call with no args to use current facingMode
+                                                        onClick={() => startWebcam()} // Call with no args to use current facingMode
                                                         color="blue"
                                                     >
                                                         Start Webcam
@@ -770,19 +731,16 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
                                                     <div className="flex flex-col">
                                                         <h1 className="text-center text-md font-medium text-blue-600 mb-4">
-                                                            * Please capture
-                                                            your image in good
-                                                            lighting, hold your
-                                                            device steady, and
-                                                            ensure the text is
-                                                            clearly visible.
+                                                            * Please capture your image in
+                                                            good lighting, hold your
+                                                            device steady, and ensure the
+                                                            text is clearly visible.
                                                         </h1>
 
                                                         <div
                                                             className="relative mx-auto"
                                                             style={{
-                                                                maxWidth:
-                                                                    '420px',
+                                                                maxWidth: '420px',
                                                             }}
                                                         >
                                                             <video
@@ -799,9 +757,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
 
                                                             <button
                                                                 type="button"
-                                                                onClick={
-                                                                    toggleCamera
-                                                                }
+                                                                onClick={toggleCamera}
                                                                 className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                                                 title="Toggle Camera"
                                                             >
@@ -814,9 +770,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                     <div className="flex justify-center space-x-4">
                                                         <PrimaryButton
                                                             type="button"
-                                                            onClick={
-                                                                captureImage
-                                                            }
+                                                            onClick={captureImage}
                                                             color="blue"
                                                         >
                                                             📸 Capture Now
@@ -841,11 +795,7 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                             <div className="flex items-center justify-between">
                                                 <h3 className="text-lg font-medium">
                                                     Captured Images (
-                                                    {
-                                                        formData.capturedImages
-                                                            .length
-                                                    }
-                                                    )
+                                                    {formData.capturedImages.length})
                                                 </h3>
                                                 <PrimaryButton
                                                     type="button"
@@ -873,27 +823,21 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() =>
-                                                                        removeImage(
-                                                                            index
-                                                                        )
+                                                                        removeImage(index)
                                                                     }
                                                                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 z-10"
                                                                 >
                                                                     ×
                                                                 </button>
                                                                 <img
-                                                                    src={
-                                                                        imageData
-                                                                    }
+                                                                    src={imageData}
                                                                     alt={`Captured ${
-                                                                        index +
-                                                                        1
+                                                                        index + 1
                                                                     }`}
                                                                     className="w-full h-24 object-cover rounded"
                                                                 />
                                                                 <p className="text-xs text-gray-500 text-center mt-1">
-                                                                    Image{' '}
-                                                                    {index + 1}
+                                                                    Image {index + 1}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -905,18 +849,19 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-end">
+                        <div className="flex sm:justify-end">
                             <PrimaryButton
                                 type="submit"
                                 variant="outline"
                                 color="blue"
                                 size="md"
                                 disabled={gradeEssayMutation.isPending}
-                                className={
+                                className={cn(
+                                    'w-full flex justify-center', // This makes the button full width by default (for all screen sizes)
                                     gradeEssayMutation.isPending
                                         ? 'bg-gray-500 cursor-not-allowed'
                                         : ''
-                                }
+                                )}
                             >
                                 {gradeEssayMutation.isPending
                                     ? 'Submitting...'

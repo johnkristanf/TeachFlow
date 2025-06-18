@@ -74,7 +74,7 @@ const BuildWithAIForm = ({
             ) : (
                 <>
                     <DialogHeader>
-                        <DialogTitle>Generated AI Rubric</DialogTitle>
+                        <DialogTitle>Build Rubric with AI</DialogTitle>
                         <DialogDescription>
                             Modify details that matches your standards
                         </DialogDescription>
@@ -83,9 +83,13 @@ const BuildWithAIForm = ({
                         <div className="grid gap-6 py-4">
                             {/* Rubric Name */}
                             <div>
-                                <label className="block font-medium mb-1">Rubric Name *</label>
+                                <label className="block font-medium mb-1">
+                                    Rubric Name *
+                                </label>
                                 <input
-                                    {...register('name', { required: 'Rubric name is required' })}
+                                    {...register('name', {
+                                        required: 'Rubric name is required',
+                                    })}
                                     className="w-full border rounded px-3 py-2"
                                     placeholder="Rubric name"
                                 />
@@ -125,7 +129,9 @@ const BuildWithAIForm = ({
 
                             {/* Category */}
                             <div>
-                                <label className="block font-medium mb-1">Essay Category *</label>
+                                <label className="block font-medium mb-1">
+                                    Essay Category *
+                                </label>
                                 <div className="flex gap-2 flex-wrap">
                                     {essay_categories.map((categ) => (
                                         <label key={categ} className="cursor-pointer">
@@ -189,7 +195,9 @@ const BuildWithAIForm = ({
 
                             {/* Language */}
                             <div>
-                                <label className="block font-medium mb-1">Language *</label>
+                                <label className="block font-medium mb-1">
+                                    Language *
+                                </label>
                                 <div className="flex gap-2 flex-wrap">
                                     {languages.map((lang) => (
                                         <label key={lang} className="cursor-pointer">
@@ -216,9 +224,14 @@ const BuildWithAIForm = ({
 
                             {/* CRITERIA */}
                             <div>
-                                <label className="block font-medium mb-1">Criteria *</label>
+                                <label className="block font-medium mb-1">
+                                    Criteria *
+                                </label>
                                 {fields.map((field, index) => (
-                                    <div key={field.id} className="flex items-center gap-2 mb-2">
+                                    <div
+                                        key={field.id}
+                                        className="flex items-center gap-2 mb-2"
+                                    >
                                         <input
                                             {...register(`criteria.${index}.title`, {
                                                 required: 'Required',
@@ -245,16 +258,28 @@ const BuildWithAIForm = ({
                             </div>
                         </div>
 
-                        <DialogFooter>
+                        <div className="pt-4 flex flex-col gap-4 w-full">
+                            <PrimaryButton
+                                type="submit"
+                                color="blue"
+                                variant="outline"
+                                size="md"
+                                className="flex justify-center"
+                            >
+                                Build
+                            </PrimaryButton>
+
                             <DialogClose asChild>
-                                <PrimaryButton color="black" variant="solid" size="md">
+                                <PrimaryButton
+                                    color="black"
+                                    variant="outline"
+                                    size="md"
+                                    className="flex justify-center"
+                                >
                                     Cancel
                                 </PrimaryButton>
                             </DialogClose>
-                            <PrimaryButton type="submit" color="blue" variant="solid" size="md">
-                                Build
-                            </PrimaryButton>
-                        </DialogFooter>
+                        </div>
                     </form>
                 </>
             )}

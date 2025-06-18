@@ -206,23 +206,26 @@ const EditRubric = ({
                                 </h1>
                             </div>
 
-                            <DialogFooter className="pt-4">
+                            <div className="pt-4 flex flex-col gap-4 w-full">
+                                <PrimaryButton
+                                    type="submit"
+                                    color="blue"
+                                    variant="outline"
+                                    className="flex justify-center"
+                                >
+                                    Save Changes
+                                </PrimaryButton>
+
                                 <PrimaryButton
                                     type="button"
                                     color="black"
                                     variant="outline"
                                     onClick={() => setOpenDialog(false)}
+                                    className="flex justify-center"
                                 >
                                     Cancel
                                 </PrimaryButton>
-                                <PrimaryButton
-                                    type="submit"
-                                    color="blue"
-                                    variant="outline"
-                                >
-                                    Save Changes
-                                </PrimaryButton>
-                            </DialogFooter>
+                            </div>
                         </form>
                     </>
                 )}

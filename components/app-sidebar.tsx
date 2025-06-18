@@ -1,13 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {
-    PhoneCall,
-    Presentation,
-    ScrollText,
-    Send,
-    Table,
-} from 'lucide-react'
+import { PhoneCall, Presentation, ScrollText, Send, Table } from 'lucide-react'
 
 import { NavProjects } from '@/components/nav-projects'
 import { NavSecondary } from '@/components/nav-secondary'
@@ -20,6 +14,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar'
 import Image from 'next/image'
 
@@ -63,9 +58,28 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { setOpen, isMobile } = useSidebar()
+
+    const handleLinkClick = () => {
+        console.log("clicked link");
+        
+        // Only close the sidebar if it's in a mobile/overlay view
+        // On desktop, the sidebar might be persistently open, so closing it would be jarring.
+        if (isMobile) {
+            setOpen(false)
+        }
+    }
+
     return (
-        <Sidebar variant="inset" {...props} className="bg-blue-500 text-white">
-            <SidebarHeader className="bg-blue-500">
+        <Sidebar
+            variant="inset"
+            {...props}
+            // Add flex column to sidebar
+            className="flex flex-col bg-blue-500 text-white"
+        >
+            <SidebarHeader className="bg-blue-500 flex-shrink-0">
+                {' '}
+                {/* flex-shrink-0 to keep header fixed size */}
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
@@ -78,7 +92,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     className="rounded-full"
                                 />
                                 <div className="grid flex-1 text-left text-sm leading-tight text-white">
-                                    <span className="truncate font-medium">TeachFlow</span>
+                                    <span className="truncate font-medium">
+                                        TeachFlow
+                                    </span>
                                     <span className="truncate text-xs">Enterprise</span>
                                 </div>
                             </a>
@@ -86,13 +102,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent className="bg-blue-500">
-                <NavProjects projects={data.core_projects} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+
+            {/* Make SidebarContent flex-grow and scrollable */}
+            <SidebarContent className="bg-blue-500 flex-grow">
+                <NavProjects
+                    projects={data.core_projects}
+                    onLinkClick={handleLinkClick}
+                />
+                <NavSecondary items={data.navSecondary} onLinkClick={handleLinkClick} />
             </SidebarContent>
-            <SidebarFooter className="bg-blue-500">
-                <NavUser user={data.user} />
-            </SidebarFooter>
         </Sidebar>
     )
 }

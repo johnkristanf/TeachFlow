@@ -14,12 +14,14 @@ import {
 
 export function NavProjects({
     projects,
+    onLinkClick
 }: {
     projects: {
         name: string
         url: string
         icon: LucideIcon
-    }[]
+    }[],
+    onLinkClick: () => void
 }) {
     const pathname = usePathname()
 

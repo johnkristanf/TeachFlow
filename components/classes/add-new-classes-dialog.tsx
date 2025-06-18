@@ -76,7 +76,7 @@ export default function AddNewClassDialog() {
     }
 
     return (
-        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <Dialog open={openDialog} onOpenChange={setOpenDialog} >
             <DialogTrigger asChild>
                 <PrimaryButton color="blue" variant="solid">
                     {' '}
@@ -84,7 +84,7 @@ export default function AddNewClassDialog() {
                     New class
                 </PrimaryButton>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-[calc(100%-5rem)] sm:max-w-lg md:max-w-xl">
                 {createClassMutation.isPending ? (
                     <SkeletonLoader msg="Creating Class..." />
                 ) : (
@@ -168,28 +168,34 @@ export default function AddNewClassDialog() {
                                     )}
                                 </div>
                             </div>
-                            <DialogFooter className="flex justify-end gap-3 pt-4">
+
+                            <div className="pt-4 flex flex-col gap-4 w-full">
+                                
+
+                                <PrimaryButton
+                                    color="blue" // Corrected color to blue as per the design
+                                    variant="outline" // Should be 'solid' as per the design
+                                    type="submit" // This button will submit the form
+                                    disabled={createClassMutation.isPending} // Disable button while submitting
+                                    className='flex justify-center'
+                                >
+                                    {createClassMutation.isPending
+                                        ? 'Creating...'
+                                        : 'Create class'}
+                                </PrimaryButton>
+
                                 <PrimaryButton
                                     type="button"
                                     color="black"
                                     variant="outline"
                                     onClick={() => setOpenDialog(false)}
                                     disabled={createClassMutation.isPending}
+                                    className='flex justify-center'
+
                                 >
                                     Cancel
                                 </PrimaryButton>
-
-                                <PrimaryButton
-                                    color="blue" // Corrected color to blue as per the design
-                                    variant="solid" // Should be 'solid' as per the design
-                                    type="submit" // This button will submit the form
-                                    disabled={createClassMutation.isPending} // Disable button while submitting
-                                >
-                                    {createClassMutation.isPending
-                                        ? 'Creating...'
-                                        : 'Create class'}
-                                </PrimaryButton>
-                            </DialogFooter>
+                            </div>
                         </form>
                     </>
                 )}

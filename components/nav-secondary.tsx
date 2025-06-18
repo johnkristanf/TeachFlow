@@ -15,6 +15,7 @@ import {
 
 export function NavSecondary({
     items,
+    onLinkClick,
     ...props
 }: {
     items: {
@@ -22,12 +23,13 @@ export function NavSecondary({
         url: string
         icon: LucideIcon
     }[]
+    onLinkClick: () => void
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
     const pathname = usePathname()
 
     return (
         <SidebarGroup {...props}>
-            <SidebarGroupLabel className="text-white">Customer Support</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-white">Support</SidebarGroupLabel>
 
             <SidebarGroupContent>
                 <SidebarMenu>
