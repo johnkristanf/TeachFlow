@@ -16,11 +16,13 @@ export async function DELETE(req: NextRequest) {
 
     try {
         await db.transaction(async (tx) => {
-            await tx.delete(essay).where(eq(essay.id, essayID))
+            // DELETE THE CHILD DATA TABLE FIRST TO AVOID FK CONSTRAINTS ERROR
             await tx.execute(
                 sql`DELETE FROM essay_evaluations WHERE essay_id = ${essayID}`
             )
             await tx.execute(sql`DELETE FROM essay_summaries WHERE essay_id = ${essayID}`)
+
+            await tx.delete(essay).where(eq(essay.id, essayID))
         })
 
         return NextResponse.json({ success: true }, { status: 200 })
