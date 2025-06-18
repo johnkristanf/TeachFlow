@@ -84,7 +84,7 @@ export default function AddNewClassDialog() {
                     New class
                 </PrimaryButton>
             </DialogTrigger>
-            <DialogContent className="max-w-[calc(100%-5rem)] sm:max-w-lg md:max-w-xl">
+            <DialogContent >
                 {createClassMutation.isPending ? (
                     <SkeletonLoader msg="Creating Class..." />
                 ) : (
