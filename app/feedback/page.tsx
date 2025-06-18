@@ -74,6 +74,10 @@ export default function FeedbackForm() {
                     - We genuinely value your honest feedback — the more real, the better.{' '}
                     <br />- Don’t hesitate to be critical if something isn’t working well.{' '}
                     <br />
+                    If you have any questions, encounter issues, or would like to learn more about the project, feel free to reach out to us directly at{' '}
+                    <a href="mailto:torremocha.johnkristan@gmail.com" className="text-blue-500 underline">
+                        torremocha.johnkristan@gmail.com
+                    </a>. We appreciate your time and support in helping us improve.
                 </p>
             </div>
 
