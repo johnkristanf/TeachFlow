@@ -46,8 +46,6 @@ export default function EssayPage() {
     useEffect(() => {
         if (!data) return
 
-        console.log('essay new: ', data)
-
         const hasPending = data.some((essay) => essay.status === 'pending')
         if (hasPending) {
             setHasPendingStatus(true)
