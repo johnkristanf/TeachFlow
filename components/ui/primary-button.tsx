@@ -15,7 +15,7 @@ interface PrimaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseStyles =
-    'inline-flex items-center gap-2 rounded-md hover:cursor-pointer  transition-colors disabled:opacity-50 font-medium'
+    'flex items-center justify-center gap-2 rounded-md hover:cursor-pointer  transition-colors disabled:opacity-50 font-medium'
 
 const variants: Record<Variant, Record<Color, string>> = {
     solid: {
