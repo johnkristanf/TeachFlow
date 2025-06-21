@@ -29,6 +29,13 @@
       "when": 1749956846903,
       "tag": "0004_milky_mindworm",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1750494183531,
+      "tag": "0005_sloppy_stark_industries",
+      "breakpoints": true
     }
   ]
 }
