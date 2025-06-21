@@ -94,3 +94,33 @@ export const classes = pgTable('classes', {
     description: text('description'),
     createdAt: timestamp('created_at').defaultNow(),
 })
+
+// USERS
+export const users = pgTable('users', {
+    id: text('id').primaryKey(),
+    email: text('email').notNull().unique(),
+    name: text('name'),
+    image: text('image'),
+    emailVerified: timestamp('email_verified', { mode: 'date' }),
+    password: text('password'), // hashed
+    role: text('role').default('USER'),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow(),
+})
+
+// ACCOUNTS
+export const accounts = pgTable('accounts', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(), // 'oauth' | 'credentials'
+    provider: text('provider').notNull(), // 'google' | 'github' | 'credentials'
+    providerAccountId: text('provider_account_id').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+})
+
+export const sessions = pgTable('sessions', {
+    sessionToken: text('session_token').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+})
