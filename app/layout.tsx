@@ -1,36 +1,15 @@
+'use client'
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-
-import { AppSidebar } from '@/components/app-sidebar'
-
-import { Separator } from '@/components/ui/separator'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import './globals.css'
-import { Toaster } from 'sonner'
 import { ReactQueryProvider } from './react-query-provider'
+import { Toaster } from 'sonner'
+import './globals.css'
+import React, { useState } from 'react'
+import { X, Menu } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from 'lucide-react'
-
-const geistSans = Geist({
-    variable: '--font-geist-sans',
-    subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
-    subsets: ['latin'],
-})
-
-export const metadata: Metadata = {
+const metadata: Metadata = {
     title: 'TeachFlow',
     icons: {
         icon: '/teachflow-logo.ico',
@@ -42,89 +21,117 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode
 }>) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const router = useRouter()
+
+    const navLinks = [
+        { name: 'Home', route: '/' },
+        { name: 'Pricing', route: '/pricing' },
+        { name: 'Contact Us', route: '/contact-us' },
+    ]
+
     return (
         <html lang="en">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <ReactQueryProvider>
-                    <SidebarProvider>
-                        <AppSidebar />
-                        <SidebarInset className="">
-                            <header className="flex h-16 shrink-0 items-center gap-2 ">
-                                <div className="flex items-center gap-2 px-4 ">
-                                    <SidebarTrigger className="-ml-1" />
-                                    <Separator
-                                        orientation="vertical"
-                                        className="mr-2 data-[orientation=vertical]:h-4"
-                                    />
-                                </div>
+            <ReactQueryProvider>
+                <body>
+                    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
 
-                                <div className="w-full  flex justify-end items-center gap-3 pr-4">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <div className="flex items-center gap-1 hover:cursor-pointer">
-                                                <Avatar>
-                                                    <AvatarImage
-                                                        src="https://github.com/shadcn.png"
-                                                        alt="@shadcn"
-                                                    />
-                                                    <AvatarFallback>
-                                                        User Profile
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <h1 className="text-gray-500 truncate font-semibold ">
-                                                    {' '}
-                                                    {/* Removed w-[80%] as it might constrain unnecessarily */}
-                                                    John Kristan Torremocha
-                                                </h1>
-                                            </div>
-                                        </DropdownMenuTrigger>
+                        {/* Header */}
+                        <header className="relative z-50 bg-black/20 backdrop-blur-lg ">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="flex items-center justify-between h-16">
+                                    <div className="flex items-center space-x-2">
+                                        <Image
+                                            src={'/teachflow-logo.png'}
+                                            alt="TeachFlow Logo"
+                                            width={50}
+                                            height={50}
+                                            className="rounded-full"
+                                        />
+                                        <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                                            TeachFlow
+                                        </span>
+                                    </div>
 
-                                        <DropdownMenuContent
-                                            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                                            align="end"
-                                            sideOffset={4}
+                                    <nav className="hidden md:flex space-x-8">
+                                        {navLinks.map((item) => (
+                                            <button
+                                                key={item.name}
+                                                onClick={() => {
+                                                    router.push(item.route)
+                                                }}
+                                                className="font-semibold hover:opacity-75 hover:cursor-pointer"
+                                            >
+                                                {item.name}
+                                            </button>
+                                        ))}
+                                    </nav>
+
+                                    <div className="hidden md:flex items-center space-x-4">
+                                        <button
+                                            onClick={() => {
+                                                router.push('/auth/signin')
+                                            }}
+                                            className="font-semibold hover:text-white hover:cursor-pointer transition-colors"
                                         >
-                                            <DropdownMenuGroup>
-                                                <DropdownMenuItem>
-                                                    <Sparkles />
-                                                    Upgrade to Pro
-                                                </DropdownMenuItem>
-                                            </DropdownMenuGroup>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuGroup>
-                                                <DropdownMenuItem>
-                                                    <BadgeCheck />
-                                                    Account
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <CreditCard />
-                                                    Billing
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Bell />
-                                                    Notifications
-                                                </DropdownMenuItem>
-                                            </DropdownMenuGroup>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem>
-                                                <LogOut />
-                                                Log out
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                            Sign In
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                router.push('/auth/register')
+                                            }}
+                                            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-4 py-2 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
+                                        >
+                                            Get Started
+                                        </button>
+                                    </div>
+
+                                    <button
+                                        className="md:hidden"
+                                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    >
+                                        {isMenuOpen ? (
+                                            <X className="w-6 h-6" />
+                                        ) : (
+                                            <Menu className="w-6 h-6" />
+                                        )}
+                                    </button>
                                 </div>
-                            </header>
-
-                            {/* MAIN PAGE */}
-                            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                                {children}
                             </div>
-                        </SidebarInset>
-                    </SidebarProvider>
-                </ReactQueryProvider>
 
-                <Toaster richColors closeButton position="top-right" />
-            </body>
+                            {/* Mobile Menu */}
+                            {isMenuOpen && (
+                                <div className="md:hidden absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-white/10">
+                                    <div className="px-4 py-6 space-y-4">
+                                        {navLinks.map((item) => (
+                                            <button
+                                                key={item.name}
+                                                onClick={() => {
+                                                    router.push(item.route)
+                                                }}
+                                            >
+                                                {item.name}
+                                            </button>
+                                        ))}
+                                        <div className="pt-4 space-y-2">
+                                            <button className="w-full text-left text-gray-300 hover:text-white hover:cursor-pointer transition-colors">
+                                                Sign In
+                                            </button>
+                                            <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 rounded-lg font-semibold">
+                                                Get Started
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </header>
+
+                        {children}
+                    </div>
+
+                    <Toaster richColors closeButton position="top-right" />
+                </body>
+            </ReactQueryProvider>
         </html>
     )
 }
