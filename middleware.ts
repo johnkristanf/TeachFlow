@@ -7,11 +7,11 @@ export default auth((req) => {
     
     const isLoggedIn = !!req.auth
     const isAuthPage = req.nextUrl.pathname.startsWith('/auth')
-    const isProtectedRoute = req.nextUrl.pathname.startsWith('/u/essays')
+    const isProtectedRoute = req.nextUrl.pathname.startsWith('/essays')
 
     // Redirect logged-in users away from auth pages
     if (isLoggedIn && isAuthPage) {
-        return Response.redirect(new URL('/u/essays', req.nextUrl))
+        return Response.redirect(new URL('/essays', req.nextUrl))
     }
 
     // Redirect non-logged-in users to sign-in page for protected routes
