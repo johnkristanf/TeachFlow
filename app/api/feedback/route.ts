@@ -1,13 +1,20 @@
 // app/api/feedback/route.ts
+import { auth } from '@/auth'
 import { db } from '@/database'
 import { feedback } from '@/database/schema'
 import { NextRequest, NextResponse } from 'next/server'
 
-
-export async function POST(req: NextRequest) {
+export const POST = auth(async function POST(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
     try {
         const data = await req.json()
-
 
         await db.insert(feedback).values({
             rating: data.rating,
@@ -19,7 +26,7 @@ export async function POST(req: NextRequest) {
             easeOfUse: data.easeOfUse,
             performance: data.performance,
             willingToPay: data.willingToPay,
-            wouldUseAgain: data.wouldUseAgain
+            wouldUseAgain: data.wouldUseAgain,
         })
 
         return NextResponse.json({ message: 'Feedback saved' }, { status: 201 })
@@ -27,4 +34,4 @@ export async function POST(req: NextRequest) {
         console.error('Failed to save feedback:', error)
         return NextResponse.json({ message: 'Server error' }, { status: 500 })
     }
-}
+})

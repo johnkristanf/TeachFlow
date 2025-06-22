@@ -1,3 +1,4 @@
+import { auth } from '@/auth'
 import { BuildWithAIRubricCreate } from '@/types/rubrics'
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
@@ -6,13 +7,32 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 })
 
-export async function POST(req: NextRequest) {
+export const POST = auth(async function POST(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
     try {
         const body = await req.json()
 
         const { name, grade, category, intensity, language, criteria }: BuildWithAIRubricCreate =
             body
         console.log('Rubric received:', body)
+
+        function getPerformanceLevels(intensity: string) {
+            switch (intensity?.toLowerCase()) {
+                case 'easy':
+                    return '3 levels: Excellent, Satisfactory, Needs Improvement'
+                case 'strict':
+                    return '5 levels: Exceptional, Proficient, Developing, Beginning, Insufficient'
+                default: // Normal
+                    return '4 levels: Excellent, Proficient, Developing, Beginning'
+            }
+        }
 
         const systemPrompt = `You are an expert educational evaluator. Generate detailed grading rubrics in valid JSON format only. Adapt complexity to grade level and subject area.`
 
@@ -56,17 +76,6 @@ export async function POST(req: NextRequest) {
                 ]
             }`
 
-        function getPerformanceLevels(intensity: string) {
-            switch (intensity?.toLowerCase()) {
-                case 'easy':
-                    return '3 levels: Excellent, Satisfactory, Needs Improvement'
-                case 'strict':
-                    return '5 levels: Exceptional, Proficient, Developing, Beginning, Insufficient'
-                default: // Normal
-                    return '4 levels: Excellent, Proficient, Developing, Beginning'
-            }
-        }
-
         const completion = await openai.chat.completions.create({
             model: 'gpt-4.1-mini',
             messages: [
@@ -86,4 +95,4 @@ export async function POST(req: NextRequest) {
         console.error('Rubric API error:', error)
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
     }
-}
+})

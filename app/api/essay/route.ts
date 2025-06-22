@@ -5,8 +5,18 @@ import { publishToQueue } from '@/lib/rabbitmq/publisher'
 import { Essay } from '@/types/essay'
 import { NextRequest, NextResponse } from 'next/server'
 import { getFileExtension } from '@/lib/utils'
+import { auth } from '@/auth'
 
-export async function POST(req: NextRequest) {
+export const POST = auth(async function POST(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
+
     const formData = await req.formData()
     const files = formData.getAll('files')
 
@@ -47,10 +57,7 @@ export async function POST(req: NextRequest) {
                 let extractedText = ''
 
                 // Case 1: Image file
-                if (
-                    mimeType.startsWith('image/') ||
-                    ['.jpg', '.jpeg', '.png'].includes(fileExt)
-                ) {
+                if (mimeType.startsWith('image/') || ['.jpg', '.jpeg', '.png'].includes(fileExt)) {
                     extractedText = await extractTextFromImage(buffer)
                 }
 
@@ -66,11 +73,12 @@ export async function POST(req: NextRequest) {
                     sourceType: gradingMethod,
                     essayText: extractedText,
                     status: 'pending',
+                    userId: req.auth?.user?.id ?? '',
                 }
 
                 const essayID = await createEssay(essayData)
-                // EVENT TRIGGER BELOW
 
+                // EVENT TRIGGER BELOW
                 await publishToQueue('grading_events', {
                     event: 'ESSAY_SUBMITTED',
                     essay_id: essayID,
@@ -89,14 +97,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
         message: 'Essay created and event published successfully',
     })
-}
+})
 
-export async function GET(req: NextRequest) {
+export const GET = auth(async function GET(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
+
     const { searchParams } = new URL(req.url)
     const selectClassFilter = searchParams.get('selectClassFilter')
-
-    console.log("selectClassFilter: ", selectClassFilter);
-    // CURRENTLY NAG ERROR PA KAY ANG EVALUATIONS AND GRADING LOGS KAY WALA PA NA CREATE
 
     try {
         const essays = await getEssays(selectClassFilter)
@@ -110,4 +124,4 @@ export async function GET(req: NextRequest) {
             { status: 500 }
         )
     }
-}
+})

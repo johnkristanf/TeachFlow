@@ -3,11 +3,20 @@ import { NextResponse, NextRequest } from 'next/server'
 import { db } from '@/database'
 import { classes, essay } from '@/database/schema'
 import { sql } from 'drizzle-orm'
+import { auth } from '@/auth'
 
-export async function GET(req: NextRequest) {
+export const GET = auth(async function GET(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
     try {
         const { searchParams } = new URL(req.url)
-        const component = searchParams.get('component') 
+        const component = searchParams.get('component')
 
         let allClasses
 
@@ -27,9 +36,7 @@ export async function GET(req: NextRequest) {
                     description: classes.description,
                     studentCount: classes.studentCount,
                     createdAt: classes.createdAt,
-                    essayCount: sql<number>`cast(count(${essay.id}) as int)`.as(
-                        'essay_count'
-                    ),
+                    essayCount: sql<number>`cast(count(${essay.id}) as int)`.as('essay_count'),
                 })
                 .from(classes)
                 .leftJoin(essay, sql`${classes.id} = ${essay.classId}`) // LEFT JOIN to include classes even if they have no essays
@@ -44,15 +51,12 @@ export async function GET(req: NextRequest) {
         return NextResponse.json(allClasses, { status: 200 })
     } catch (error) {
         console.error('Error fetching classes:', error)
-        return NextResponse.json(
-            { message: 'Internal server error.' },
-            { status: 500 }
-        )
-    } 
-}
+        return NextResponse.json({ message: 'Internal server error.' }, { status: 500 })
+    }
+})
 
 // POST handler to create a new class
-export async function POST(req: Request) {
+export const POST = auth(async function POST(req) {
     try {
         const body = await req.json()
         const { name, description, studentCount } = body
@@ -89,9 +93,6 @@ export async function POST(req: Request) {
         )
     } catch (error) {
         console.error('API Error creating class:', error)
-        return NextResponse.json(
-            { message: 'Internal server error.' },
-            { status: 500 }
-        )
+        return NextResponse.json({ message: 'Internal server error.' }, { status: 500 })
     }
-}
+})

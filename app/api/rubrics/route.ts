@@ -1,8 +1,17 @@
+import { auth } from '@/auth'
 import { getAllRubrics, getRubricsWithDetails } from '@/lib/queries/rubrics/get'
 import { createRubric } from '@/lib/queries/rubrics/post'
 import { NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+export const POST = auth(async function POST(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
     const data = await req.json()
     console.log('data createRubric', data)
 
@@ -16,14 +25,22 @@ export async function POST(req: Request) {
         console.error(err)
         return NextResponse.json({ error: 'Failed to save rubric' }, { status: 500 })
     }
-}
+})
 
-export async function GET(req: Request) {
+export const GET = auth(async function GET(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
     const { searchParams } = new URL(req.url)
     const source = searchParams.get('source')
 
-    console.log("source ni: ", source);
-    
+    console.log('source ni: ', source)
+
     try {
         const data = await getRubricsWithDetails(source) // filtered by tab source
         return NextResponse.json(data)
@@ -31,4 +48,4 @@ export async function GET(req: Request) {
         console.error(err)
         return NextResponse.json({ error: 'Failed to fetch rubrics' }, { status: 500 })
     }
-}
+})

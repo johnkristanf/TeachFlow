@@ -1,9 +1,18 @@
+import { auth } from '@/auth'
 import { updateEssayStatus } from '@/lib/queries/essays/update'
 import { getRubricCriteria } from '@/lib/queries/rubrics/get'
 import { publishToQueue } from '@/lib/rabbitmq/publisher'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(req: NextRequest) {
+export const POST = auth(async function POST(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
     try {
         const formData = await req.formData()
 
@@ -43,4 +52,4 @@ export async function POST(req: NextRequest) {
         console.error('Failed regrade essay:', error)
         return NextResponse.json({ message: 'Server error' }, { status: 500 })
     }
-}
+})

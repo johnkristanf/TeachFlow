@@ -3,29 +3,27 @@ import { eq, inArray } from 'drizzle-orm'
 import { db } from '@/database'
 import { rubrics, criteria, levels } from '@/database/schema'
 import { Levels } from '@/types/rubrics'
+import { auth } from '@/auth'
 
-export async function PUT(req: NextRequest) {
+export const PUT = auth(async function PUT(req) {
+    if (!req.auth) {
+        return NextResponse.json(
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
+        )
+    }
     const id = req.nextUrl.pathname.split('/').pop()
     const rubricID = Number(id)
 
     if (isNaN(rubricID)) {
-        return NextResponse.json(
-            { success: false, message: 'Invalid rubric ID' },
-            { status: 400 }
-        )
+        return NextResponse.json({ success: false, message: 'Invalid rubric ID' }, { status: 400 })
     }
 
     const body = await req.json()
 
-    const {
-        name,
-        grade,
-        intensity,
-        category,
-        language,
-        created_by,
-        criteria: criteriaData,
-    } = body
+    const { name, grade, intensity, category, language, created_by, criteria: criteriaData } = body
 
     try {
         // 1. Update rubric
@@ -72,22 +70,24 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ success: true })
     } catch (err) {
         console.error('Error updating rubric:', err)
+        return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 })
+    }
+})
+
+export const DELETE = auth(async function DELETE(req) {
+    if (!req.auth) {
         return NextResponse.json(
-            { success: false, error: 'Server error' },
-            { status: 500 }
+            {
+                message: 'User unauthenticated',
+            },
+            { status: 401 }
         )
     }
-}
-
-export async function DELETE(req: NextRequest) {
     const id = req.nextUrl.pathname.split('/').pop()
     const rubricID = Number(id)
 
     if (isNaN(rubricID)) {
-        return NextResponse.json(
-            { success: false, message: 'Invalid rubric ID' },
-            { status: 400 }
-        )
+        return NextResponse.json({ success: false, message: 'Invalid rubric ID' }, { status: 400 })
     }
 
     try {
@@ -95,9 +95,6 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ success: true })
     } catch (err) {
         console.error('Failed to delete rubric:', err)
-        return NextResponse.json(
-            { success: false, message: 'Server error' },
-            { status: 500 }
-        )
+        return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 })
     }
-}
+})
