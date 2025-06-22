@@ -1,13 +1,12 @@
 'use client'
 import type { Metadata } from 'next'
-import './globals.css'
-import { ReactQueryProvider } from './react-query-provider'
 import { Toaster } from 'sonner'
-import './globals.css'
 import React, { useState } from 'react'
 import { X, Menu } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { ReactQueryProvider } from '../react-query-provider'
+import '../globals.css'
 
 const metadata: Metadata = {
     title: 'TeachFlow',
