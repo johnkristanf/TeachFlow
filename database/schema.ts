@@ -1,12 +1,4 @@
-import {
-    pgTable,
-    serial,
-    text,
-    varchar,
-    timestamp,
-    integer,
-    jsonb,
-} from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, varchar, timestamp, integer, jsonb } from 'drizzle-orm/pg-core'
 
 // RUBRICS
 export const rubrics = pgTable('rubrics', {
@@ -17,6 +9,7 @@ export const rubrics = pgTable('rubrics', {
     category: text('category').notNull(),
     language: text('language').notNull(),
     created_by: text('created_by'),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at').defaultNow(),
 })
 
@@ -56,6 +49,8 @@ export const essay = pgTable('essay', {
     sourceType: text('source_type').notNull(), // 'files upload' or 'webcam'
     essayText: text('essay_text').notNull(),
     status: text('status').notNull(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })
 
@@ -84,6 +79,8 @@ export const feedback = pgTable('feedback', {
     wouldUseAgain: varchar('would_use_again', { length: 255 }).notNull(),
     willingToPay: varchar('willing_to_pay', { length: 255 }).notNull(),
     performance: varchar('performance', { length: 255 }),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })
 
@@ -92,6 +89,7 @@ export const classes = pgTable('classes', {
     name: text('name').notNull(),
     studentCount: integer('student_count').notNull(),
     description: text('description'),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at').defaultNow(),
 })
 

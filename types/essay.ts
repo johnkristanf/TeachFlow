@@ -6,7 +6,8 @@ export type Essay = {
     classId?: number | null
     sourceType: string
     essayText: string
-    status: string
+    status: string,
+    userId: string
 }
 
 export interface Evaluation {
