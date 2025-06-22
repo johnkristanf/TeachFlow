@@ -47,7 +47,7 @@ export const nextAuthConfig: NextAuthConfig = {
 
                 const existingUser = await respData.json()
 
-                if (existingUser) {
+                if (respData.ok && existingUser) {
                     token.id = existingUser.id
                     token.email = existingUser.email
                     token.name = existingUser.name
