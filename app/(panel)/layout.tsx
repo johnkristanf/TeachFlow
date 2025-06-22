@@ -18,6 +18,7 @@ import '../globals.css'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import LogoutDialog from '@/components/logout-dialog'
+import { Toaster } from 'sonner'
 
 export default async function PanelLayout({
     children,
@@ -107,6 +108,7 @@ export default async function PanelLayout({
                             <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
                         </SidebarInset>
                     </SidebarProvider>
+                    <Toaster richColors closeButton position="top-right" />
                 </ReactQueryProvider>
             </body>
         </html>
