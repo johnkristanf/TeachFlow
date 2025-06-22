@@ -1,5 +1,5 @@
 export default function RegisterPage() {
     return (
-        <h1>sdfsdf</h1>
+        <h1>HEHE WALA PANI NATIWAS</h1>
     )
 }

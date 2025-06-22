@@ -14,11 +14,20 @@ import {
 import { BadgeCheck, Bell, CreditCard, Sparkles } from 'lucide-react'
 import { ReactQueryProvider } from '../react-query-provider'
 
-import '../globals.css'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import LogoutDialog from '@/components/logout-dialog'
 import { Toaster } from 'sonner'
+import type { Metadata } from 'next'
+import '../globals.css'
+
+
+export const metadata: Metadata = {
+    title: 'TeachFlow',
+    icons: {
+        icon: '/teachflow-logo.ico',
+    },
+}
 
 export default async function PanelLayout({
     children,
@@ -50,7 +59,7 @@ export default async function PanelLayout({
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <div className="flex items-center gap-2 hover:cursor-pointer max-w-xs">
-                                                <Avatar className='size-9'>
+                                                <Avatar className="size-9">
                                                     <AvatarImage
                                                         src={session.user?.image ?? ''}
                                                         alt="User Image Profile"
