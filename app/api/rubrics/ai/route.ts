@@ -8,14 +8,10 @@ const openai = new OpenAI({
 })
 
 export const POST = auth(async function POST(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
+
     try {
         const body = await req.json()
 

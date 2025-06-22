@@ -1,15 +1,21 @@
 import { db } from '@/database'
 import { criteria, levels, rubrics } from '@/database/schema'
 import { Criteria } from '@/types/rubrics'
-import { desc, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 
 export async function getAllRubrics() {
     const data = await db.select().from(rubrics).orderBy(desc(rubrics.createdAt))
     return data
 }
 
-export async function getRubricsWithDetails(source: string | null) {
-    const baseQuery = db
+export async function getRubricsWithDetails(source: string | null, userID: string) {
+    const conditions = [eq(rubrics.userId, userID)]
+
+    if (source) {
+        conditions.push(eq(rubrics.created_by, source))
+    }
+
+    const rubricList = await db
         .select({
             id: rubrics.id,
             name: rubrics.name,
@@ -20,11 +26,8 @@ export async function getRubricsWithDetails(source: string | null) {
             created_by: rubrics.created_by,
         })
         .from(rubrics)
+        .where(and(...conditions))
         .orderBy(desc(rubrics.createdAt)) // 🆕 Sort by latest
-
-    const rubricList = source
-        ? await baseQuery.where(eq(rubrics.created_by, source))
-        : await baseQuery
 
     const rubricIds = rubricList.map((r) => r.id)
 
@@ -57,9 +60,7 @@ export async function getRubricsWithDetails(source: string | null) {
     return rubricsWithDetails
 }
 
-
-
-export async function getRubricCriteria(rubricName: string) {
+export async function getRubricCriteria(rubricName: string, userID: string) {
     try {
         const result = await db
             .select({
@@ -84,8 +85,7 @@ export async function getRubricCriteria(rubricName: string) {
             .from(rubrics)
             .leftJoin(criteria, eq(rubrics.id, criteria.rubricId))
             .leftJoin(levels, eq(criteria.id, levels.criterionId))
-            .where(eq(rubrics.name, rubricName))
-
+            .where(and(eq(rubrics.name, rubricName), eq(rubrics.userId, userID)))
         if (!result.length) {
             console.log(`Rubric '${rubricName}' not found`)
             return null

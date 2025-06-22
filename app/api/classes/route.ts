@@ -2,21 +2,18 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { db } from '@/database'
 import { classes, essay } from '@/database/schema'
-import { sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { auth } from '@/auth'
 
 export const GET = auth(async function GET(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
+
     try {
         const { searchParams } = new URL(req.url)
         const component = searchParams.get('component')
+        const userId = req.auth.user.id
 
         let allClasses
 
@@ -27,6 +24,7 @@ export const GET = auth(async function GET(req) {
                     name: classes.name,
                 })
                 .from(classes)
+                .where(eq(classes.userId, userId))
         } else {
             // Default behavior: Fetch all details including essay count
             allClasses = await db
@@ -39,6 +37,7 @@ export const GET = auth(async function GET(req) {
                     essayCount: sql<number>`cast(count(${essay.id}) as int)`.as('essay_count'),
                 })
                 .from(classes)
+                .where(eq(classes.userId, userId))
                 .leftJoin(essay, sql`${classes.id} = ${essay.classId}`) // LEFT JOIN to include classes even if they have no essays
                 .groupBy(
                     classes.id,
@@ -57,40 +56,24 @@ export const GET = auth(async function GET(req) {
 
 // POST handler to create a new class
 export const POST = auth(async function POST(req) {
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
+    }
+
     try {
         const body = await req.json()
+        const userID = req.auth.user.id
         const { name, description, studentCount } = body
 
         // Insert new class into the database using Drizzle ORM
-        const result = await db
-            .insert(classes)
-            .values({
-                name: name,
-                description: description,
-                studentCount: studentCount,
-            })
-            .returning({
-                id: classes.id,
-                name: classes.name,
-                studentCount: classes.studentCount,
-                description: classes.description,
-                createdAt: classes.createdAt,
-            }) // Return the inserted data
+        const result = await db.insert(classes).values({
+            name: name,
+            description: description,
+            studentCount: studentCount,
+            userId: userID,
+        })
 
-        if (result.length === 0) {
-            return NextResponse.json(
-                { message: 'Failed to create class in database.' },
-                { status: 500 }
-            )
-        }
-
-        return NextResponse.json(
-            {
-                message: 'Class created successfully!',
-                class: result[0], // Return the newly created class object
-            },
-            { status: 201 }
-        )
+        return NextResponse.json({ message: 'Class created successfully!' }, { status: 201 })
     } catch (error) {
         console.error('API Error creating class:', error)
         return NextResponse.json({ message: 'Internal server error.' }, { status: 500 })

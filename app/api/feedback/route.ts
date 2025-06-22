@@ -5,16 +5,12 @@ import { feedback } from '@/database/schema'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const POST = auth(async function POST(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
     try {
         const data = await req.json()
+        const userId = req.auth.user.id
 
         await db.insert(feedback).values({
             rating: data.rating,
@@ -27,6 +23,7 @@ export const POST = auth(async function POST(req) {
             performance: data.performance,
             willingToPay: data.willingToPay,
             wouldUseAgain: data.wouldUseAgain,
+            userId: userId
         })
 
         return NextResponse.json({ message: 'Feedback saved' }, { status: 201 })

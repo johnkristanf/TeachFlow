@@ -7,8 +7,6 @@ import { rubric_tabs_columns } from './rubric-tabs-columns'
 
 const RubricTypeTabs = () => {
     const [selectedTab, setSelectedTab] = useState<string>('teachflow_rubrics')
-    console.log('selectedTab: ', selectedTab)
-
     const {
         data: rubrics,
         isLoading,
@@ -23,8 +21,6 @@ const RubricTypeTabs = () => {
         },
         enabled: !!selectedTab, // only fetch when tab is set
     })
-
-    console.log('rubrics in tabs with relation: ', rubrics)
 
     return (
         <Tabs

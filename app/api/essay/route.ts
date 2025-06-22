@@ -8,17 +8,13 @@ import { getFileExtension } from '@/lib/utils'
 import { auth } from '@/auth'
 
 export const POST = auth(async function POST(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
 
     const formData = await req.formData()
     const files = formData.getAll('files')
+    const userId = req.auth.user.id
 
     // Get other form data fields
     const rubricID = formData.get('rubric_id') as string
@@ -73,7 +69,7 @@ export const POST = auth(async function POST(req) {
                     sourceType: gradingMethod,
                     essayText: extractedText,
                     status: 'pending',
-                    userId: req.auth?.user?.id ?? '',
+                    userId: userId,
                 }
 
                 const essayID = await createEssay(essayData)
@@ -100,20 +96,16 @@ export const POST = auth(async function POST(req) {
 })
 
 export const GET = auth(async function GET(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
     const selectClassFilter = searchParams.get('selectClassFilter')
+    const userId = req.auth.user.id
 
     try {
-        const essays = await getEssays(selectClassFilter)
+        const essays = await getEssays(selectClassFilter, userId)
         return NextResponse.json(essays)
     } catch (error) {
         console.error(`Failed to get essays:`, error)

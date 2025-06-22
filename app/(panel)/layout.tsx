@@ -50,7 +50,7 @@ export default async function PanelLayout({
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <div className="flex items-center gap-2 hover:cursor-pointer max-w-xs">
-                                                <Avatar>
+                                                <Avatar className='size-9'>
                                                     <AvatarImage
                                                         src={session.user?.image ?? ''}
                                                         alt="User Image Profile"
@@ -59,10 +59,10 @@ export default async function PanelLayout({
                                                 </Avatar>
 
                                                 <div className="flex flex-col overflow-hidden max-w-[12rem]">
-                                                    <h1 className="text-gray-500 font-semibold truncate">
+                                                    <h1 className="text-gray-500 font-semibold text-sm truncate">
                                                         {session.user?.name}
                                                     </h1>
-                                                    <p className="text-gray-300 font-semibold text-sm truncate">
+                                                    <p className="text-gray-300 font-semibold text-xs truncate">
                                                         {session.user?.email}
                                                     </p>
                                                 </div>

@@ -1,7 +1,7 @@
 import { db } from '@/database'
 import { criteria, levels, rubrics } from '@/database/schema'
 
-export async function createRubric(data: any) {
+export async function createRubric(data: any, userID: string) {
     const [rubric] = await db
         .insert(rubrics)
         .values({
@@ -10,6 +10,7 @@ export async function createRubric(data: any) {
             intensity: data.intensity,
             category: data.category,
             language: data.language,
+            userId: userID,
             created_by: 'my_rubrics'
         })
         .returning()

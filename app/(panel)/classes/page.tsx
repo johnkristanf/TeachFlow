@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { UsersIcon,  FileIcon } from 'lucide-react' // Assuming you have Heroicons installed
+import { UsersIcon, FileIcon } from 'lucide-react' // Assuming you have Heroicons installed
 import AddNewClassDialog from '@/components/classes/add-new-classes-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { Classes } from '@/types/classes'
@@ -68,15 +68,12 @@ export default function ClassesPage() {
                             <p className="text-sm text-gray-500 mb-4">
                                 Created on{' '}
                                 {classItem.createdAt
-                                    ? new Date(classItem.createdAt).toLocaleString(
-                                          'en-US',
-                                          {
-                                              month: 'short',
-                                              day: 'numeric',
-                                              hour: 'numeric',
-                                              minute: 'numeric',
-                                          }
-                                      )
+                                    ? new Date(classItem.createdAt).toLocaleString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          hour: 'numeric',
+                                          minute: 'numeric',
+                                      })
                                     : 'N/A'}
                             </p>
                             <div className="flex space-x-4 text-gray-600 text-sm">
@@ -89,8 +86,8 @@ export default function ClassesPage() {
                                     <FileIcon className="h-4 w-4" />
                                     <span>
                                         {classItem.essayCount && classItem.essayCount <= 1
-                                            ? 'essay'
-                                            : 'essays'}
+                                            ? `${classItem.essayCount} essay`
+                                            : `${classItem.essayCount} essays`}
                                     </span>
                                 </div>
                             </div>

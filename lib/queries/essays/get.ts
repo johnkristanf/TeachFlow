@@ -1,12 +1,19 @@
 import { db } from '@/database'
 
-export async function getEssays(selectClassFilter: string | null) {
+export async function getEssays(selectClassFilter: string | null, userId: string) {
     const parsedFilter = Number(selectClassFilter)
-    const whereClause =
-        selectClassFilter && !isNaN(parsedFilter)
-            ? `WHERE e.class_id = ${parsedFilter}`
-            : ''
-            
+    const conditions: string[] = []
+
+    // Class filter
+    if (selectClassFilter && !isNaN(parsedFilter)) {
+        conditions.push(`e.class_id = ${parsedFilter}`)
+    }
+
+    // User filter
+    conditions.push(`e.user_id = '${userId}'`)
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+
     const result = await db.execute(`
 
         WITH LatestGradingLog AS (

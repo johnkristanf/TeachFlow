@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '@/database'
 import { rubrics, criteria, levels } from '@/database/schema'
 import { Levels } from '@/types/rubrics'
 import { auth } from '@/auth'
 
 export const PUT = auth(async function PUT(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
+
+    const userId = req.auth.user.id
     const id = req.nextUrl.pathname.split('/').pop()
     const rubricID = Number(id)
 
@@ -30,7 +27,7 @@ export const PUT = auth(async function PUT(req) {
         await db
             .update(rubrics)
             .set({ name, grade, intensity, category, language, created_by })
-            .where(eq(rubrics.id, rubricID))
+            .where(and(eq(rubrics.id, rubricID), eq(rubrics.userId, userId)))
 
         // 2. Delete old criteria and levels
         const existingCriteria = await db
@@ -75,14 +72,11 @@ export const PUT = auth(async function PUT(req) {
 })
 
 export const DELETE = auth(async function DELETE(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
+
+    const userId = req.auth.user.id
     const id = req.nextUrl.pathname.split('/').pop()
     const rubricID = Number(id)
 
@@ -91,7 +85,7 @@ export const DELETE = auth(async function DELETE(req) {
     }
 
     try {
-        await db.delete(rubrics).where(eq(rubrics.id, rubricID))
+        await db.delete(rubrics).where(and(eq(rubrics.id, rubricID), eq(rubrics.userId, userId)))
         return NextResponse.json({ success: true })
     } catch (err) {
         console.error('Failed to delete rubric:', err)

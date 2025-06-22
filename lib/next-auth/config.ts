@@ -39,27 +39,40 @@ export const nextAuthConfig: NextAuthConfig = {
 
             // On first sign in, user object will be available
             if (user && account) {
-                // GOOGLE DATA API INSERTION DUE TO EDGERUNTIME NOT SUPPORTING
-                // NATIVE MODULES
-
-                await fetch(`${process.env.NEXTAUTH_URL}/api/users/save`, {
-                    method: 'POST',
+                // Fetch the existing user from DB by email or provider ID
+                const respData = await fetch(`${process.env.NEXTAUTH_URL}/api/users/save?email=${user.email}`, {
+                    method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: user.id,
-                        email: user.email,
-                        name: user.name,
-                        image: user.image,
-                        provider: account.provider,
-                        providerAccountId: account.providerAccountId,
-                    }),
                 })
 
-                // STORE DATA TO TOKEN
-                token.id = user.id
-                token.email = user.email
-                token.name = user.name
-                token.picture = user.image
+                const existingUser = await respData.json()
+
+                if (existingUser) {
+                    token.id = existingUser.id
+                    token.email = existingUser.email
+                    token.name = existingUser.name
+                    token.picture = existingUser.image
+                    token.role = existingUser.role // if you store roles
+                } else {
+                    // First time login → insert user
+                    await fetch(`${process.env.NEXTAUTH_URL}/api/users/save`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: user.id,
+                            email: user.email,
+                            name: user.name,
+                            image: user.image,
+                            provider: account.provider,
+                            providerAccountId: account.providerAccountId,
+                        }),
+                    })
+
+                    token.id = user.id
+                    token.email = user.email
+                    token.name = user.name
+                    token.picture = user.image
+                }
             }
 
             return token
@@ -75,13 +88,13 @@ export const nextAuthConfig: NextAuthConfig = {
                 session.user.email = token.email as string
                 session.user.name = token.name as string
                 session.user.image = token.picture as string
+                // session.user.role = token.role as string
             }
 
             // console.log('Session after:', session)
             // console.log('=======================')
             return session
         },
-
     },
     session: {
         strategy: 'jwt',

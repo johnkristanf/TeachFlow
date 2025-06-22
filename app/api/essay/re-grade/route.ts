@@ -5,16 +5,13 @@ import { publishToQueue } from '@/lib/rabbitmq/publisher'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const POST = auth(async function POST(req) {
-    if (!req.auth) {
-        return NextResponse.json(
-            {
-                message: 'User unauthenticated',
-            },
-            { status: 401 }
-        )
+    if (!req.auth || !req.auth.user?.id) {
+        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
     }
+
     try {
         const formData = await req.formData()
+        const userId = req.auth.user.id
 
         const essayID = formData.get('essay_id') as string
         const essayText = formData.get('essay_text') as string
@@ -31,7 +28,7 @@ export const POST = auth(async function POST(req) {
         console.log('- grade_level:', gradeLevel)
         console.log('- grade_intensity:', gradeIntensity)
 
-        const rubricCriteria = await getRubricCriteria(rubricName)
+        const rubricCriteria = await getRubricCriteria(rubricName, userId)
         console.log('- rubricCriteria:', rubricCriteria)
 
         await publishToQueue('grading_events', {
@@ -45,7 +42,7 @@ export const POST = auth(async function POST(req) {
         })
 
         const parsedEssayID = Number(essayID)
-        await updateEssayStatus(parsedEssayID, 'pending')
+        await updateEssayStatus(parsedEssayID, userId, 'pending')
 
         return NextResponse.json({ message: 'Submitted for Regrading' })
     } catch (error) {
