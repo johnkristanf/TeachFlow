@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
             .where(eq(users.email, email))
             .then((res) => res[0]) // extract single row
 
-        return NextResponse.json(existingUser, { status: 201 })
+        return NextResponse.json(JSON.parse(JSON.stringify(existingUser)), { status: 200 })
     } catch (err) {
         console.error(err)
         return NextResponse.json({ message: 'Checking User Failed' }, { status: 500 })
