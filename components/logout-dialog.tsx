@@ -41,7 +41,7 @@ export default function LogoutDialog() {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-1">
                             <CircleAlert className="text-red-400 size-5" />
-                            Are you absolutely sure?
+                            Are you sure you want to log out?
                         </DialogTitle>
                         <DialogDescription className="text-sm text-gray-500">
                             You will be signed out of your account and redirected to the login page.
@@ -65,7 +65,7 @@ export default function LogoutDialog() {
                                 color="red"
                             >
                                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                                Yes, Log Out
+                                Yes
                             </PrimaryButton>
                         </form>
                     </DialogFooter>
