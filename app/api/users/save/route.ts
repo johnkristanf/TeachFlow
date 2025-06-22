@@ -39,7 +39,13 @@ export async function GET(req: NextRequest) {
 
     try {
         const existingUser = await db
-            .select()
+            .select({
+                id: users.id,
+                name: users.name,
+                email: users.email,
+                image: users.image,
+                role: users.role,
+            })
             .from(users)
             .where(eq(users.email, email))
             .then((res) => res[0]) // extract single row
