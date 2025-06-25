@@ -96,7 +96,7 @@ export const classes = pgTable('classes', {
 // USERS
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
-    email: text('email').notNull().unique(),
+    email: text('email').unique(),
     name: text('name'),
     image: text('image'),
     emailVerified: timestamp('email_verified', { mode: 'date' }),
@@ -113,12 +113,5 @@ export const accounts = pgTable('accounts', {
     type: text('type').notNull(), // 'oauth' | 'credentials'
     provider: text('provider').notNull(), // 'google' | 'github' | 'credentials'
     providerAccountId: text('provider_account_id').notNull(),
-    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
-})
-
-export const sessions = pgTable('sessions', {
-    sessionToken: text('session_token').primaryKey(),
-    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })
