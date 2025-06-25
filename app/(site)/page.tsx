@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { ArrowRight, Brain, Target } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function LandingPage() {
     const [currentFeature, setCurrentFeature] = useState(0)
-
+    const router = useRouter()
 
     const features = [
         {
@@ -32,7 +33,6 @@ export default function LandingPage() {
         return () => clearInterval(interval)
     }, [])
 
-   
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
             {/* Hero Section */}
@@ -45,17 +45,22 @@ export default function LandingPage() {
                                     AI-Powered
                                 </span>
                                 <br />
-                                Essay Grading
+                                Teaching Assistant
                             </h1>
                             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                                Revolutionary AI technology that grades essays instantly, builds
-                                custom rubrics, and provides detailed feedback - transforming
-                                education one essay at a time.
+                                A modern AI platform built to support educators and streamline their
+                                daily tasks — helping transform the way teaching and learning
+                                happens.
                             </p>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <button className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-blue-500/25 flex items-center space-x-2">
+                            <button
+                                onClick={() => {
+                                    router.push('/auth/signin')
+                                }}
+                                className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-blue-500/25 flex items-center space-x-2"
+                            >
                                 <span>Start Free Trial</span>
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
@@ -109,8 +114,6 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
-
-          
 
             {/* CTA Section */}
             <section className="relative z-10 py-32">
