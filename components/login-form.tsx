@@ -27,7 +27,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                                 className="w-full hover:cursor-pointer"
                             >
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                    {/* ... SVG path data for Facebook logo ... */}
                                     <path d="M14 13.5H16.5L17.5 10.5H14V8.5C14 7.25 14.5 6.5 16 6.5H17.5V3.5C17.133 3.467 15.667 3.333 14 3.5C11.5 3.5 10 5.167 10 7.75V10.5H7V13.5H10V22H13V13.5H14Z" />
                                 </svg>
                                 Signin with Facebook
