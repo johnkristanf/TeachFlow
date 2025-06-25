@@ -1,5 +1,8 @@
 import { NextAuthConfig } from 'next-auth'
+
 import Google from 'next-auth/providers/google'
+import Facebook from 'next-auth/providers/facebook'
+import Credentials from 'next-auth/providers/credentials'
 
 export const nextAuthConfig: NextAuthConfig = {
     secret: process.env.AUTH_SECRET,
@@ -27,6 +30,32 @@ export const nextAuthConfig: NextAuthConfig = {
                 }
             },
         }),
+
+        Facebook({
+            clientId: process.env.FACEBOOK_CLIENT_ID,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+            authorization: {
+                params: {
+                    scope: 'email public_profile ',
+                },
+            },
+        }),
+
+        Credentials({
+            name: 'credentials',
+            credentials: {
+                email: { label: 'Email', type: 'email' },
+                password: { label: 'Password', type: 'password' },
+            },
+
+            authorize: async (credentials) => {
+                if (!credentials?.email || !credentials?.password) {
+                    return null
+                }
+
+                return null;
+            },
+        }),
     ],
     callbacks: {
         async jwt({ token, user, account, profile }) {
@@ -39,11 +68,13 @@ export const nextAuthConfig: NextAuthConfig = {
 
             // On first sign in, user object will be available
             if (user && account) {
-                // Fetch the existing user from DB by email or provider ID
-                const respData = await fetch(`${process.env.NEXTAUTH_URL}/api/users/save?email=${user.email}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                })
+                const respData = await fetch(
+                    `${process.env.NEXTAUTH_URL}/api/users/save?email=${user.email}`,
+                    {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                    }
+                )
 
                 const existingUser = await respData.json()
 
