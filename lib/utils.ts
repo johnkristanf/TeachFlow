@@ -1,7 +1,9 @@
-
 import { clsx, type ClassValue } from 'clsx'
 import path from 'path'
 import { twMerge } from 'tailwind-merge'
+
+import { Document, Packer, Paragraph, TextRun } from 'docx'
+import { saveAs } from 'file-saver'
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -32,8 +34,89 @@ export const formatFileSize = (bytes: number) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
+export const getGradingPerformanceLevels = (intensity: string) => {
+    switch (intensity?.toLowerCase()) {
+        case 'easy':
+            return '3 levels: Excellent, Satisfactory, Needs Improvement'
+        case 'strict':
+            return '5 levels: Exceptional, Proficient, Developing, Beginning, Insufficient'
+        default: // Normal
+            return '4 levels: Excellent, Proficient, Developing, Beginning'
+    }
+}
+
+export const numericTimeStamp = () => {
+    const now = new Date()
+    const day = String(now.getDate()).padStart(2, '0')
+    const month = String(now.getMonth() + 1).padStart(2, '0') // Months are 0-indexed
+    const year = String(now.getFullYear()).slice(-2) // Get last 2 digits of year
+    const timestamp = `${day}${month}${year}`
+
+    return timestamp
+}
+
 export const formatArray = (items: any[]) => (items?.length ? items.join(', ') : 'None')
 
 export const getFileExtension = (fileName: string) => path.extname(fileName).toLowerCase()
 
+export const handleDownloadQuizToDocx = async (set: any, index: number) => {
+    const children: Paragraph[] = []
 
+    children.push(
+        new Paragraph({
+            children: [new TextRun({ text: `Quiz Set ${index + 1}`, bold: true, size: 32 })],
+            spacing: { after: 300 },
+        })
+    )
+
+    // Multiple Choice
+    if (set.multiple_choice?.length) {
+        children.push(
+            new Paragraph({
+                children: [new TextRun({ text: 'Multiple Choice', bold: true })],
+                spacing: { after: 200 },
+            })
+        )
+        set.multiple_choice.forEach((q: any, i: number) => {
+            children.push(new Paragraph(`Q${i + 1}: ${q.question}`))
+            q.choices.forEach((choice: string, j: number) => {
+                children.push(new Paragraph(`   ${String.fromCharCode(65 + j)}. ${choice}`))
+            })
+            children.push(new Paragraph(`Answer: ${q.answer}`))
+        })
+    }
+
+    // Fill in the Blank
+    if (set.fill_in_blank?.length) {
+        children.push(
+            new Paragraph({
+                children: [new TextRun({ text: 'Fill in the Blank', bold: true })],
+                spacing: { before: 400, after: 200 },
+            })
+        )
+        set.fill_in_blank.forEach((q: any, i: number) => {
+            children.push(new Paragraph(`Q${i + 1}: ${q.question}`))
+            children.push(new Paragraph(`Answer: ${q.answer}`))
+        })
+    }
+
+    // True or False
+    if (set.true_or_false?.length) {
+        children.push(
+            new Paragraph({
+                children: [new TextRun({ text: 'True or False', bold: true })],
+                spacing: { before: 400, after: 200 },
+            })
+        )
+        set.true_or_false.forEach((q: any, i: number) => {
+            children.push(new Paragraph(`Q${i + 1}: ${q.question}`))
+            children.push(new Paragraph(`Answer: ${q.answer ? 'True' : 'False'}`))
+        })
+    }
+
+    const doc = new Document({ sections: [{ properties: {}, children }] })
+
+    const timestamp = numericTimeStamp()
+    const blob = await Packer.toBlob(doc)
+    saveAs(blob, `quiz-set-${timestamp}.docx`)
+}
