@@ -40,7 +40,7 @@ export default function DeleteClassDialog({ classData }: DeleteClassDialogProps)
 
             return response.json()
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['classes'] })
             setOpenDialog(false)
             toast.success('Class deleted successfully!')

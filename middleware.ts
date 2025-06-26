@@ -5,7 +5,7 @@ export default auth((req) => {
     const isAuthPage = req.nextUrl.pathname.startsWith('/auth')
 
     const publicRoutes = ['/', '/pricing', '/contact-us']
-    const protectedRoutes = ['/essays', '/classes', '/feedback', 'rubrics'] // add more as needed
+    const protectedRoutes = ['/essays', '/classes', '/feedback', '/rubrics', '/quiz/generator'] // add more as needed
 
     const isProtectedRoute = protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))
     const isPublicRoute = publicRoutes.some((route) => req.nextUrl.pathname === route)

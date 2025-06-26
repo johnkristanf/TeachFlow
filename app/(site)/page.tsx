@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
-import { ArrowRight, Brain, Target } from 'lucide-react'
+import { ArrowRight, Brain, Shapes, Target } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function LandingPage() {
@@ -23,6 +23,14 @@ export default function LandingPage() {
             description:
                 'Create custom rubrics tailored to your curriculum with AI-powered suggestions and templates',
             color: 'from-indigo-500 to-purple-500',
+        },
+
+        {
+            icon: <Shapes className="w-12 h-12" />,
+            title: 'AI Quiz Generator',
+            description:
+                'Transform your learning material into dynamic assessments. Our AI reads your PDFs or DOCX files and auto-generates Multiple Choice, Fill in the Blank, and True/False questions — tailored to your curriculum.',
+            color: 'from-emerald-500 to-teal-400',
         },
     ]
 
@@ -87,7 +95,7 @@ export default function LandingPage() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {features.map((feature, index) => (
                             <div
                                 key={index}
@@ -131,7 +139,12 @@ export default function LandingPage() {
                             improve student outcomes.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-purple-500/25 flex items-center justify-center space-x-2">
+                            <button
+                                className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-purple-500/25 flex items-center justify-center space-x-2"
+                                onClick={() => {
+                                    router.push('/auth/signin')
+                                }}
+                            >
                                 <span>Start Your Free Trial</span>
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
