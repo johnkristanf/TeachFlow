@@ -1,9 +1,11 @@
 'use client'
 import React from 'react'
-import { UsersIcon, FileIcon } from 'lucide-react' // Assuming you have Heroicons installed
+import { UsersIcon, FileIcon, Trash2 } from 'lucide-react' // Assuming you have Heroicons installed
 import AddNewClassDialog from '@/components/classes/add-new-classes-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { Classes } from '@/types/classes'
+import EditClassDialog from '@/components/classes/edit-class'
+import DeleteClassDialog from '@/components/classes/delete-class'
 
 export default function ClassesPage() {
     const {
@@ -62,9 +64,17 @@ export default function ClassesPage() {
                             key={classItem.id} // Use unique ID for key
                             className="md:w-64 border-l-4 border-blue-400 border rounded-lg p-4 shadow-sm space-y-3"
                         >
-                            <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                                {classItem.name}
-                            </h2>
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                    {classItem.name}
+                                </h2>
+
+                                <div className="flex items-center gap-2">
+                                    <EditClassDialog classData={classItem} />
+                                    <DeleteClassDialog classData={classItem} />
+                                </div>
+                            </div>
+
                             <p className="text-sm text-gray-500 mb-4">
                                 Created on{' '}
                                 {classItem.createdAt
