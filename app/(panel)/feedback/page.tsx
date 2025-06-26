@@ -5,19 +5,8 @@ import { Star } from 'lucide-react'
 import clsx from 'clsx'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { FeedbackData } from '@/types/feedback'
 
-type FeedbackData = {
-    rating: number
-    liked: string
-    bugs: string
-    confusing?: string
-    suggestions: string
-    contact?: string
-    easeOfUse: number
-    wouldUseAgain: string
-    willingToPay: string
-    performance: 'fast' | 'acceptable' | 'slow'
-}
 
 export default function FeedbackForm() {
     const {
