@@ -1,4 +1,5 @@
 import { auth } from '@/auth'
+import { getGradingPerformanceLevels } from '@/lib/utils'
 import { BuildWithAIRubricCreate } from '@/types/rubrics'
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
@@ -17,18 +18,6 @@ export const POST = auth(async function POST(req) {
 
         const { name, grade, category, intensity, language, criteria }: BuildWithAIRubricCreate =
             body
-        console.log('Rubric received:', body)
-
-        function getPerformanceLevels(intensity: string) {
-            switch (intensity?.toLowerCase()) {
-                case 'easy':
-                    return '3 levels: Excellent, Satisfactory, Needs Improvement'
-                case 'strict':
-                    return '5 levels: Exceptional, Proficient, Developing, Beginning, Insufficient'
-                default: // Normal
-                    return '4 levels: Excellent, Proficient, Developing, Beginning'
-            }
-        }
 
         const systemPrompt = `You are an expert educational evaluator. Generate detailed grading rubrics in valid JSON format only. Adapt complexity to grade level and subject area.`
 
@@ -47,7 +36,7 @@ export const POST = auth(async function POST(req) {
             }
 
             PERFORMANCE LEVELS:
-            ${getPerformanceLevels(intensity)}
+            ${getGradingPerformanceLevels(intensity)}
 
             Generate each criterion with specific, measurable descriptions appropriate for ${grade} ${category} writing in ${language}.
 
@@ -70,7 +59,8 @@ export const POST = auth(async function POST(req) {
                         ]
                     }
                 ]
-            }`
+            }
+        `
 
         const completion = await openai.chat.completions.create({
             model: 'gpt-4.1-mini',
@@ -80,12 +70,9 @@ export const POST = auth(async function POST(req) {
             ],
             temperature: 0.2,
             max_tokens: 1500,
-            response_format: { type: 'json_object' },
         })
 
         const content = completion.choices[0].message.content
-        console.log('content: ', content)
-
         return NextResponse.json(content)
     } catch (error: any) {
         console.error('Rubric API error:', error)
