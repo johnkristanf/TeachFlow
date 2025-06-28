@@ -11,7 +11,7 @@ export default function UnAuthenticatedNavBar() {
     const navLinks = [
         { name: 'Home', route: '/' },
         { name: 'Pricing', route: '/pricing' },
-        { name: 'Contact Us', route: '/contact-us' },
+        // { name: 'Contact Us', route: '/contact-us' },
     ]
     return (
         <header className="relative z-50 bg-black/20 backdrop-blur-lg ">
@@ -49,11 +49,10 @@ export default function UnAuthenticatedNavBar() {
                             onClick={() => {
                                 router.push('/auth/signin')
                             }}
-                            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-4 py-2 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
+                            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-4 py-2 hover:cursor-pointer rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
                         >
                             Sign In, It's Free
                         </button>
-                       
                     </div>
 
                     <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -66,22 +65,28 @@ export default function UnAuthenticatedNavBar() {
             {isMenuOpen && (
                 <div className="md:hidden absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-white/10">
                     <div className="px-4 py-6 space-y-4">
-                        {navLinks.map((item) => (
-                            <button
-                                key={item.name}
-                                onClick={() => {
-                                    router.push(item.route)
-                                }}
-                            >
-                                {item.name}
-                            </button>
-                        ))}
+                        <div className="flex flex-col gap-3">
+                            {navLinks.map((item) => (
+                                <button
+                                    key={item.name}
+                                    onClick={() => {
+                                        router.push(item.route)
+                                    }}
+                                    className="font-semibold hover:opacity-75 hover:cursor-pointer"
+                                >
+                                    {item.name}
+                                </button>
+                            ))}
+                        </div>
+
                         <div className="pt-4 space-y-2">
-                            <button className="w-full text-left text-gray-300 hover:text-white hover:cursor-pointer transition-colors">
-                                Sign In
-                            </button>
-                            <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 rounded-lg font-semibold">
-                                Get Started
+                            <button
+                                onClick={() => {
+                                    router.push('/auth/signin')
+                                }}
+                                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-4 py-2 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
+                            >
+                                Sign In, It's Free
                             </button>
                         </div>
                     </div>

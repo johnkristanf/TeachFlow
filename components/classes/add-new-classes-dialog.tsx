@@ -71,7 +71,6 @@ export default function AddNewClassDialog() {
     })
 
     const onSubmit = async (data: Classes) => {
-        console.log('Form data submitted:', data)
         createClassMutation.mutate(data)
     }
 

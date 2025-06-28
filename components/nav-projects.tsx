@@ -40,6 +40,7 @@ export function NavProjects({
                                     href={item.url}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-md transition 
                                     ${isActive ? 'bg-white text-gray-900' : 'text-white'}`}
+                                    onClick={onLinkClick}
                                 >
                                     <item.icon />
                                     <span>{item.name}</span>

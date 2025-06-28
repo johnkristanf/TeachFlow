@@ -48,11 +48,11 @@ const data = {
     ],
 
     navSecondary: [
-        {
-            title: 'Contact Us',
-            url: '/contact-us',
-            icon: PhoneCall,
-        },
+        // {
+        //     title: 'Contact Us',
+        //     url: '/contact-us',
+        //     icon: PhoneCall,
+        // },
         {
             title: 'Feedback',
             url: '/feedback',
@@ -86,8 +86,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {/* flex-shrink-0 to keep header fixed size */}
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <a href="#">
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            className="text-white hover:text-black transition-colors"
+                        >
+                            <a href="/essays" className="hover:bg-blue-600 transition-colors">
                                 <Image
                                     src={'/teachflow-logo.png'}
                                     alt="TeachFlow Logo"
@@ -95,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     height={30}
                                     className="rounded-full"
                                 />
-                                <div className="grid flex-1 text-left text-sm leading-tight text-white">
+                                <div className="grid flex-1 text-left text-sm leading-tight ">
                                     <span className="truncate font-medium">TeachFlow</span>
                                     <span className="truncate text-xs">Enterprise</span>
                                 </div>
