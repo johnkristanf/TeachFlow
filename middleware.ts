@@ -3,9 +3,10 @@ import { NextRequest } from 'next/server'
 export default function middleware(request: NextRequest) {
     // console.log('All cookies:', request.cookies.getAll())
 
-    const sessionCookie = request.cookies.get('authjs.session-token')
+    const devSessionCookie = request.cookies.get('authjs.session-token')
+    const prodSessionCookie = request.cookies.get('__Secure-authjs.session-token')
 
-    const isLoggedIn = !!sessionCookie?.value
+    const isLoggedIn = !!(devSessionCookie?.value || prodSessionCookie?.value)
     const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
 
     const publicRoutes = ['/', '/pricing', '/contact-us']
