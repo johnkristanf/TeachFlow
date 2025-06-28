@@ -120,3 +120,17 @@ export const handleDownloadQuizToDocx = async (set: any, index: number) => {
     const blob = await Packer.toBlob(doc)
     saveAs(blob, `quiz-set-${timestamp}.docx`)
 }
+
+export function cleanAIJSONResponse(content: string): string {
+    // Remove markdown code blocks and clean up the response
+    let cleaned = content.trim()
+
+    // Remove ```json and ``` markers
+    cleaned = cleaned.replace(/^```json\s*/i, '')
+    cleaned = cleaned.replace(/\s*```$/, '')
+
+    // Remove any remaining backticks at start/end
+    cleaned = cleaned.replace(/^`+/, '').replace(/`+$/, '')
+
+    return cleaned.trim()
+}

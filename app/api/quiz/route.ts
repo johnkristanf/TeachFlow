@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { generateQuiz } from '@/lib/open-ai/generate_quiz'
 import { extractTextFromPDF } from '@/lib/server/quiz-utils'
-import { getFileExtension } from '@/lib/utils'
+import { cleanAIJSONResponse, getFileExtension } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
 export const POST = auth(async function POST(req) {
@@ -43,7 +43,13 @@ export const POST = auth(async function POST(req) {
             true_or_false
         )
 
-        return NextResponse.json(generatedQuizJSON)
+        if (!generatedQuizJSON) {
+            throw new Error('No content received from OpenAI generateQuiz')
+        }
+
+        // Clean the response and validate JSON
+        const cleanedContent = cleanAIJSONResponse(generatedQuizJSON)
+        return NextResponse.json(cleanedContent)
     } catch (error) {
         console.error('Error in generating quiz: ', error)
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })

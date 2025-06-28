@@ -10,8 +10,6 @@ export const POST = auth(async function POST(req) {
     const data = await req.json()
     const userId = req.auth.user.id
 
-    console.log('data createRubric', data)
-
     try {
         const rubric = await createRubric(data, userId)
         return NextResponse.json({
