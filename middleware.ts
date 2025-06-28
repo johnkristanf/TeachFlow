@@ -1,22 +1,28 @@
-import { auth } from '@/auth'
+import { NextRequest } from 'next/server'
 
-export default auth((req) => {
-    const isLoggedIn = !!req.auth
-    const isAuthPage = req.nextUrl.pathname.startsWith('/auth')
+export default function middleware(request: NextRequest) {
+    // console.log('All cookies:', request.cookies.getAll())
+
+    const sessionCookie = request.cookies.get('authjs.session-token')
+
+    const isLoggedIn = !!sessionCookie?.value
+    const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
 
     const publicRoutes = ['/', '/pricing', '/contact-us']
     const protectedRoutes = ['/essays', '/classes', '/feedback', '/rubrics', '/quiz/generator'] // add more as needed
 
-    const isProtectedRoute = protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))
-    const isPublicRoute = publicRoutes.some((route) => req.nextUrl.pathname === route)
+    const isProtectedRoute = protectedRoutes.some((route) =>
+        request.nextUrl.pathname.startsWith(route)
+    )
+    const isPublicRoute = publicRoutes.some((route) => request.nextUrl.pathname === route)
 
     // ✅ Redirect logged-in users away from auth pages & public routes like landing
     if (isLoggedIn && (isAuthPage || isPublicRoute)) {
-        return Response.redirect(new URL('/essays', req.nextUrl))
+        return Response.redirect(new URL('/essays', request.nextUrl))
     }
 
     // Redirect non-logged-in users to sign-in page for protected routes
     if (!isLoggedIn && isProtectedRoute) {
-        return Response.redirect(new URL('/auth/signin', req.nextUrl))
+        return Response.redirect(new URL('/auth/signin', request.nextUrl))
     }
-})
+}
