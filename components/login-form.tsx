@@ -1,15 +1,16 @@
 'use client'
 
-import { signIn } from '@/auth'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PrimaryButton } from './ui/primary-button'
-import { signInWithFacebook, signInWithGoogle } from '@/actions/auth'
+import { signInWithFacebook, signInWithGoogle, signInWithMagicLink } from '@/actions/auth'
+import { useState } from 'react'
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
             <Card>
@@ -63,7 +64,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                         </form>
                     </div>
 
-                    <form>
+                    <form action={signInWithMagicLink}>
                         <div className="grid gap-6">
                             <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                                 <span className="bg-card text-muted-foreground relative z-10 px-2">
@@ -76,31 +77,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                                     <Input
                                         id="email"
                                         type="email"
+                                        name='email'
                                         placeholder="m@example.com"
                                         required
                                     />
                                 </div>
-                                <div className="grid gap-3">
-                                    <div className="flex items-center">
-                                        <Label htmlFor="password">Password</Label>
-                                        <a
-                                            href="#"
-                                            className="ml-auto text-sm underline-offset-4 hover:underline"
-                                        >
-                                            Forgot your password?
-                                        </a>
-                                    </div>
-                                    <Input id="password" type="password" required />
-                                </div>
+
                                 <PrimaryButton type="submit" color="blue" variant="outline">
-                                    Sign In
+                                    Continue
                                 </PrimaryButton>
-                            </div>
-                            <div className="text-center text-sm">
-                                Don&apos;t have an account?{' '}
-                                <a href="#" className="underline underline-offset-4">
-                                    Sign up
-                                </a>
                             </div>
                         </div>
                     </form>

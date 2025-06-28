@@ -11,6 +11,10 @@ export async function signInWithFacebook() {
     await signIn('facebook', { redirectTo: '/essays' })
 }
 
+export async function signInWithMagicLink(formData: FormData) {
+    await signIn('resend', formData)
+}
+
 export async function signOutUser() {
     await signOut({ redirectTo: '/' })
 }

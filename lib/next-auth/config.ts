@@ -1,15 +1,18 @@
 import { NextAuthConfig } from 'next-auth'
+import { DrizzleAdapter } from '@auth/drizzle-adapter'
 
+import Resend from 'next-auth/providers/resend'
 import Google from 'next-auth/providers/google'
 import Facebook from 'next-auth/providers/facebook'
-import Credentials from 'next-auth/providers/credentials'
+import { db } from '@/database'
 
 export const nextAuthConfig: NextAuthConfig = {
     secret: process.env.AUTH_SECRET,
+    adapter: DrizzleAdapter(db),
     providers: [
         Google({
-            clientId: process.env.AUTH_GOOGLE_ID,
-            clientSecret: process.env.AUTH_GOOGLE_SECRET,
+            clientId: process.env.AUTH_GOOGLE_ID!,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET!,
             // Add authorization parameters to request proper scopes
             authorization: {
                 params: {
@@ -32,102 +35,162 @@ export const nextAuthConfig: NextAuthConfig = {
         }),
 
         Facebook({
-            clientId: process.env.FACEBOOK_CLIENT_ID,
-            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+            clientId: process.env.FACEBOOK_CLIENT_ID!,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
             authorization: {
                 params: {
                     scope: 'email public_profile ',
                 },
             },
+
+            profile(profile) {
+                return {
+                    id: profile.id,
+                    name: profile.name,
+                    email: profile.email,
+                    image: profile.picture?.data?.url,
+                }
+            },
         }),
 
-        Credentials({
-            name: 'credentials',
-            credentials: {
-                email: { label: 'Email', type: 'email' },
-                password: { label: 'Password', type: 'password' },
-            },
+        Resend({
+            apiKey: process.env.RESEND_API_KEY,
+            from: process.env.EMAIL_FROM,
 
-            authorize: async (credentials) => {
-                if (!credentials?.email || !credentials?.password) {
-                    return null
+            sendVerificationRequest: async ({ identifier, url, provider }) => {
+                const { host } = new URL(url)
+
+                const html = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center;">
+                            <h1 style="color: white; margin: 0;">Welcome to TeachFlow</h1>
+                        </div>
+
+                        <div style="padding: 40px; background: #f8f9fa;">
+                            <h2 style="color: #333; margin-bottom: 20px;">Sign in to your account</h2>
+                            <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
+                                Click the button below to securely sign in to your account. This link will expire in 24 hours.
+                            </p>
+
+                            <a href="${url}" style="
+                                display: inline-block;
+                                background: #667eea;
+                                color: white;
+                                padding: 15px 30px;
+                                text-decoration: none;
+                                border-radius: 8px;
+                                font-weight: bold;
+                                margin-bottom: 20px;
+                            ">
+                                Sign In to TeachFlow
+                            </a>
+
+                            <p style="color: #999; font-size: 14px;">
+                                If you didn't request this email, you can safely ignore it.
+                            </p>
+                        </div>
+                        <div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">
+                        © 2025 TeachFlow. All rights reserved.
+                        </div>
+                    </div>
+                    `
+
+                const res = await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${provider.apiKey}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        from: provider.from,
+                        to: identifier,
+                        subject: `Sign in to ${host}`,
+                        html: html,
+                        text: `Sign in to ${host}\n\nClick here to sign in: ${url}\n\nIf you didn't request this email, you can safely ignore it.`,
+                    }),
+                })
+
+                if (!res.ok) {
+                    throw new Error('Failed to send email')
                 }
-
-                return null;
             },
         }),
     ],
+
     callbacks: {
-        async jwt({ token, user, account, profile }) {
-            // console.log('=== JWT CALLBACK ===')
-            // console.log('Token:', token)
-            // console.log('User:', user)
-            // console.log('Account:', account)
-            // console.log('Profile:', profile)
-            // console.log('==================')
+        async signIn({ user, account, profile }) {
+            // Optional: Add custom validation logic here
 
-            // On first sign in, user object will be available
-            if (user && account) {
-                const respData = await fetch(
-                    `${process.env.NEXTAUTH_URL}/api/users/save?email=${user.email}`,
-                    {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    }
-                )
+            // if (account?.provider === 'google') {
+            //     // Example: Only allow verified Google emails
+            //     return profile?.email_verified === true
+            // }
 
-                const existingUser = await respData.json()
+            // if (account?.provider === 'facebook') {
+            //     // Example: Ensure Facebook account has email
+            //     return !!user.email
+            // }
 
-                if (respData.ok && existingUser) {
-                    token.id = existingUser.id
-                    token.email = existingUser.email
-                    token.name = existingUser.name
-                    token.picture = existingUser.image
-                    token.role = existingUser.role // if you store roles
-                } else {
-                    // First time login → insert user
-                    await fetch(`${process.env.NEXTAUTH_URL}/api/users/save`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id: user.id,
-                            email: user.email,
-                            name: user.name,
-                            image: user.image,
-                            provider: account.provider,
-                            providerAccountId: account.providerAccountId,
-                        }),
-                    })
-
-                    token.id = user.id
-                    token.email = user.email
-                    token.name = user.name
-                    token.picture = user.image
-                }
-            }
-
-            return token
+            // For email provider, NextAuth handles verification
+            return true
         },
-        async session({ session, token }) {
-            // console.log('=== SESSION CALLBACK ===')
-            // console.log('Session before:', session)
-            // console.log('Token:', token)
 
-            // Send properties to the client
-            if (token) {
-                session.user.id = token.id as string
-                session.user.email = token.email as string
-                session.user.name = token.name as string
-                session.user.image = token.picture as string
-                // session.user.role = token.role as string
+        // PURPOSE OF SESSION IS TO FORMAT WHAT DATA THE USER CAN SEE
+        async session({ session, user }) {
+            // User data comes fresh from database
+            if (user) {
+                session.user.id = user.id
+                session.user.email = user.email
+                session.user.name = user.name
+                session.user.image = user.image
             }
-
-            // console.log('Session after:', session)
-            // console.log('=======================')
             return session
         },
+
+       
     },
+
+    // THINK OF EVENT LIKE A WEBHOOK WHERE YOU PERFORM BACKGROUND TASK
+    // IF A CERTAIN EVENT IS FINISHED
+    events: {
+        async signIn({ user, account, profile, isNewUser }) {
+            console.log('User signed in:', {
+                userId: user.id,
+                email: user.email,
+                provider: account?.provider,
+                isNewUser,
+            })
+
+            // You can add custom logic here for new users
+            if (isNewUser) {
+                console.log('New user created:', user.email)
+                // Send welcome email, create default settings, etc.
+            }
+        },
+
+        async createUser({ user }) {
+            console.log('New user created in database:', {
+                userId: user.id,
+                email: user.email,
+            })
+        },
+
+        async linkAccount({ user, account }) {
+            console.log('Account linked:', {
+                userId: user.id,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+            })
+        },
+    },
+
     session: {
-        strategy: 'jwt',
+        strategy: 'database',
     },
+
+    pages: {
+        verifyRequest: '/auth/verify-request',
+    },
+
+    debug: process.env.NODE_ENV === 'development',
 }
