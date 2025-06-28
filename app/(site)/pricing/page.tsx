@@ -1,6 +1,12 @@
-import { CheckCircle } from "lucide-react";
+'use client'
+
+import { CheckCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function PricingPage() {
+
+    const router = useRouter();
+
     return (
         <div className="relative z-10 py-18">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,10 +40,19 @@ export default function PricingPage() {
                                 </li>
                                 <li className="flex items-center space-x-2">
                                     <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Basic rubric templates</span>
+                                    <span>Up to 5 quizzes/month</span>
+                                </li>
+                                <li className="flex items-center space-x-2">
+                                    <CheckCircle className="w-5 h-5 text-green-400" />
+                                    <span>Custom rubric builder</span>
                                 </li>
                             </ul>
-                            <button className="w-full bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all duration-200">
+                            <button
+                                onClick={() => {
+                                    router.push('/auth/signin')
+                                }}
+                                className="w-full bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all duration-200"
+                            >
                                 Get Started Free
                             </button>
                         </div>
@@ -62,7 +77,12 @@ export default function PricingPage() {
                             <ul className="space-y-3 text-left mb-8">
                                 <li className="flex items-center space-x-2">
                                     <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Up to 500 essays/month</span>
+                                    <span>Up to 250 essays/month</span>
+                                </li>
+
+                                <li className="flex items-center space-x-2">
+                                    <CheckCircle className="w-5 h-5 text-green-400" />
+                                    <span>Up to 50 quizzes/month</span>
                                 </li>
                                 <li className="flex items-center space-x-2">
                                     <CheckCircle className="w-5 h-5 text-green-400" />
@@ -70,32 +90,30 @@ export default function PricingPage() {
                                 </li>
                                 <li className="flex items-center space-x-2">
                                     <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Advanced AI feedback</span>
-                                </li>
-                                <li className="flex items-center space-x-2">
-                                    <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Analytics dashboard</span>
-                                </li>
-                                <li className="flex items-center space-x-2">
-                                    <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Priority support</span>
+                                    <span>Advanced AI essay feedback</span>
                                 </li>
                             </ul>
-                            <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105">
+                            <button
+                                onClick={() => {
+                                    router.push('/auth/signin')
+                                }}
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
+                            >
                                 Start Free Trial
                             </button>
                         </div>
                     </div>
 
-                    {/* Enterprise Plan */}
+                    {/* Premium Plan */}
                     <div className="group relative bg-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/10 hover:border-purple-500/50 transition-all duration-300 transform hover:scale-105">
                         <div className="text-center">
-                            <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                            <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-                                Custom
+                            <h3 className="text-2xl font-bold mb-2">Premium</h3>
+                            <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-1">
+                                $19.99
                             </div>
+                            <p className="text-gray-300 text-sm mb-4">per month</p>
                             <p className="text-gray-300 mb-6">
-                                For schools and large educational institutions
+                                For schools and power users who need everything
                             </p>
                             <ul className="space-y-3 text-left mb-8">
                                 <li className="flex items-center space-x-2">
@@ -104,23 +122,24 @@ export default function PricingPage() {
                                 </li>
                                 <li className="flex items-center space-x-2">
                                     <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Advanced integrations</span>
+                                    <span>Unlimited quizzes</span>
                                 </li>
                                 <li className="flex items-center space-x-2">
                                     <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Custom AI training</span>
+                                    <span>Premium AI models</span>
                                 </li>
                                 <li className="flex items-center space-x-2">
                                     <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>Dedicated support</span>
-                                </li>
-                                <li className="flex items-center space-x-2">
-                                    <CheckCircle className="w-5 h-5 text-green-400" />
-                                    <span>SLA guarantee</span>
+                                    <span>Bulk import/export</span>
                                 </li>
                             </ul>
-                            <button className="w-full bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all duration-200">
-                                Contact Sales
+                            <button
+                                onClick={() => {
+                                    router.push('/auth/signin')
+                                }}
+                                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
+                            >
+                                Upgrade to Premium
                             </button>
                         </div>
                     </div>
