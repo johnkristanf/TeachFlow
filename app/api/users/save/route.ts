@@ -15,7 +15,6 @@ export async function POST(req: Request) {
         })
 
         await db.insert(accounts).values({
-            id: crypto.randomUUID(),
             userId: body.id,
             type: 'oauth',
             provider: body.provider,
@@ -44,7 +43,6 @@ export async function GET(req: NextRequest) {
                 name: users.name,
                 email: users.email,
                 image: users.image,
-                role: users.role,
             })
             .from(users)
             .where(eq(users.email, email))
