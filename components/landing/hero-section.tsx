@@ -6,6 +6,8 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = React.memo(({ onStartTrial }: HeroSectionProps) => {
+    const demoVideoLink = 'https://drive.google.com/file/d/1ws3EGRflEWlI1MCTvmjPC6at5JfxDmig/view?usp=sharing';
+
     return (
         <section className="relative z-10 pt-20 pb-32">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,7 +35,7 @@ export const HeroSection = React.memo(({ onStartTrial }: HeroSectionProps) => {
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
                         <a
-                            href="/link/sa/drive"
+                            href={demoVideoLink}
                             target="__blank"
                             className="border-2 border-white/20 hover:border-white/40 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
                         >
