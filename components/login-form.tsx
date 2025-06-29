@@ -25,7 +25,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             <Button
                                 type="submit"
                                 variant="outline"
-                                className="w-full hover:cursor-pointer"
+                                className="w-full hover:cursor-pointer p-8"
                             >
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M14 13.5H16.5L17.5 10.5H14V8.5C14 7.25 14.5 6.5 16 6.5H17.5V3.5C17.133 3.467 15.667 3.333 14 3.5C11.5 3.5 10 5.167 10 7.75V10.5H7V13.5H10V22H13V13.5H14Z" />
@@ -39,7 +39,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             <Button
                                 type="submit"
                                 variant="outline"
-                                className="w-full hover:cursor-pointer"
+                                className="w-full hover:cursor-pointer p-8"
                             >
                                 <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
                                     <path
@@ -64,7 +64,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                         </form>
                     </div>
 
-                    <form action={signInWithMagicLink}>
+                    {/* <form action={signInWithMagicLink}>
                         <div className="grid gap-6">
                             <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                                 <span className="bg-card text-muted-foreground relative z-10 px-2">
@@ -88,12 +88,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                                 </PrimaryButton>
                             </div>
                         </div>
-                    </form>
+                    </form> */}
                 </CardContent>
             </Card>
-            <div className="text-white  text-center text-xs text-balance *:[a]:hover:underline ">
-                By clicking continue, you agree to our <a href="#">Terms of Service</a> and{' '}
-                <a href="#">Privacy Policy</a>.
+            <div className="text-white  text-center text-xs text-balance ">
+                By clicking continue, you agree to our <a href="#" className='underline'>Terms of Service</a> and{' '}
+                <a href="#" className='underline'>Privacy Policy</a>.
             </div>
         </div>
     )
