@@ -672,8 +672,8 @@ export function EssayGradingForm({ onCloseDialog }: EssayGradingFormProps) {
                                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                                         <div className="text-center space-y-4">
                                             {!webcamActive ? (
-                                                <div>
-                                                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <div className="w-16 h-16 rounded-lg flex items-center bg-gray-100 justify-center mx-auto ">
                                                         📷
                                                     </div>
                                                     <p className="text-gray-600 mb-4">
