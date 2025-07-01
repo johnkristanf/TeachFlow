@@ -83,7 +83,7 @@ export default async function PanelLayout({
                                             align="end"
                                             sideOffset={4}
                                         >
-                                            <DropdownMenuGroup>
+                                            {/* <DropdownMenuGroup>
                                                 <DropdownMenuItem>
                                                     <Sparkles />
                                                     Upgrade to Pro
@@ -103,7 +103,7 @@ export default async function PanelLayout({
                                                     <Bell />
                                                     Notifications
                                                 </DropdownMenuItem>
-                                            </DropdownMenuGroup>
+                                            </DropdownMenuGroup> */}
                                             <DropdownMenuSeparator />
 
                                             {/* LOGOUT MENU */}
