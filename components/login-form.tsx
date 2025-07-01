@@ -21,7 +21,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                 <CardContent>
                     <div className="flex flex-col gap-3 pt-1 pb-2 ">
                         {/* FACEBOOK OAUTH LOGIN */}
-                        <form action={signInWithFacebook}>
+                        {/* <form action={signInWithFacebook}>
                             <Button
                                 type="submit"
                                 variant="outline"
@@ -32,7 +32,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                                 </svg>
                                 Signin with Facebook
                             </Button>
-                        </form>
+                        </form> */}
 
                         {/* GOOGLE OAUTH LOGIN */}
                         <form action={signInWithGoogle}>
