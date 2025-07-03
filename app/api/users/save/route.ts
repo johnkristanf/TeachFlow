@@ -22,9 +22,9 @@ export async function POST(req: Request) {
         })
 
         return new Response('User inserted', { status: 201 })
-    } catch (err) {
-        console.error(err)
-        return new Response('Insert failed', { status: 500 })
+    } catch (error) {
+        console.error('Error in creating new user: ', error)
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }
 
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     const email = searchParams.get('email')
 
     if (!email) {
-        return NextResponse.json({ message: 'Email is required' }, { status: 400 })
+        return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
     try {
@@ -49,8 +49,8 @@ export async function GET(req: NextRequest) {
             .then((res) => res[0] ?? null) // 👈 returns null if not found
 
         return NextResponse.json(existingUser, { status: 200 })
-    } catch (err) {
-        console.error(err)
-        return NextResponse.json({ message: 'Checking User Failed' }, { status: 500 })
+    } catch (error) {
+        console.error('Error in checking existing user: ', error)
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

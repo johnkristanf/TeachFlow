@@ -67,7 +67,7 @@ export const PUT = auth(async function PUT(req) {
         return NextResponse.json({ success: true })
     } catch (err) {
         console.error('Error updating rubric:', err)
-        return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 })
+        return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 })
 
@@ -89,6 +89,6 @@ export const DELETE = auth(async function DELETE(req) {
         return NextResponse.json({ success: true })
     } catch (err) {
         console.error('Failed to delete rubric:', err)
-        return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 })
+        return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 })

@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 
 export const POST = auth(async function POST(req) {
     if (!req.auth || !req.auth.user?.id) {
-        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
+        return NextResponse.json({ error: 'User unauthenticated' }, { status: 401 })
     }
     const data = await req.json()
     const userId = req.auth.user.id
@@ -24,7 +24,7 @@ export const POST = auth(async function POST(req) {
 
 export const GET = auth(async function GET(req) {
     if (!req.auth || !req.auth.user?.id) {
-        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
+        return NextResponse.json({ error: 'User unauthenticated' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)

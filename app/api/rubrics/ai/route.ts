@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const POST = auth(async function POST(req) {
     if (!req.auth || !req.auth.user?.id) {
-        return NextResponse.json({ message: 'User unauthenticated' }, { status: 401 })
+        return NextResponse.json({ error: 'User unauthenticated' }, { status: 401 })
     }
 
     try {
@@ -17,9 +17,8 @@ export const POST = auth(async function POST(req) {
         const cleanedContent = cleanAIJSONResponse(generatedRubric)
 
         return NextResponse.json(cleanedContent)
-        
     } catch (error: any) {
         console.error('Rubric API error:', error)
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 })
