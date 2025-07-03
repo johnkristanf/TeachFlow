@@ -6,40 +6,68 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PrimaryButton } from './ui/primary-button'
-import { signInWithFacebook, signInWithGoogle, signInWithMagicLink } from '@/actions/auth'
+import { signInWithCredentials, signInWithGoogle } from '@/actions/auth'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const router = useRouter()
+
+    const handleRegisterRedirect = () => {
+        router.push('/auth/register')
+    }
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setIsSubmitting(true)
+
+        try {
+            const formData = new FormData(event.currentTarget)
+            const result = await signInWithCredentials(formData)
+
+            if (result) {
+                toast.success('Successfully signed in!')
+                router.push('/essays')
+            }   
+        } catch (error) {
+            console.error('Error in signing in user: ', error)
+            toast.error(error instanceof Error ? error.message : 'Failed to sign in')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
             <Card>
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Welcome back</CardTitle>
-                    <CardDescription>Login with your Facebook or Google account</CardDescription>
+                    <CardDescription>Login with Google account</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-col gap-3 pt-1 pb-2 ">
                         {/* FACEBOOK OAUTH LOGIN */}
                         {/* <form action={signInWithFacebook}>
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                className="w-full hover:cursor-pointer p-8"
-                            >
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M14 13.5H16.5L17.5 10.5H14V8.5C14 7.25 14.5 6.5 16 6.5H17.5V3.5C17.133 3.467 15.667 3.333 14 3.5C11.5 3.5 10 5.167 10 7.75V10.5H7V13.5H10V22H13V13.5H14Z" />
-                                </svg>
-                                Signin with Facebook
-                            </Button>
-                        </form> */}
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    className="w-full hover:cursor-pointer p-8"
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M14 13.5H16.5L17.5 10.5H14V8.5C14 7.25 14.5 6.5 16 6.5H17.5V3.5C17.133 3.467 15.667 3.333 14 3.5C11.5 3.5 10 5.167 10 7.75V10.5H7V13.5H10V22H13V13.5H14Z" />
+                                    </svg>
+                                    Signin with Facebook
+                                </Button>
+                            </form> */}
 
                         {/* GOOGLE OAUTH LOGIN */}
-                        <form action={signInWithGoogle}>
+                        <form action={signInWithGoogle} method="POST">
                             <Button
                                 type="submit"
                                 variant="outline"
-                                className="w-full hover:cursor-pointer p-8"
+                                className="w-full hover:cursor-pointer"
                             >
                                 <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
                                     <path
@@ -64,8 +92,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                         </form>
                     </div>
 
-                    {/* <form action={signInWithMagicLink}>
-                        <div className="grid gap-6">
+                    <form onSubmit={handleSubmit} method="POST">
+                        <div className="grid gap-6 mt-3">
                             <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                                     Or continue with
@@ -77,23 +105,55 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                                     <Input
                                         id="email"
                                         type="email"
-                                        name='email'
+                                        name="email"
                                         placeholder="m@example.com"
-                                        required
                                     />
                                 </div>
 
-                                <PrimaryButton type="submit" color="blue" variant="outline">
-                                    Continue
+                                <div className="grid gap-3">
+                                    <Label htmlFor="email">Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        name="password"
+                                        placeholder="m@example.com"
+                                    />
+                                </div>
+
+                                <PrimaryButton
+                                    type="submit"
+                                    color="blue"
+                                    variant="outline"
+                                    disabled={isSubmitting}
+                                    className={isSubmitting ? 'hover:!cursor-not-allowed' : ''}
+                                >
+                                    {isSubmitting ? 'Signing in...' : 'Sign In'}
                                 </PrimaryButton>
+
+                                <div className="text-center">
+                                    Don't have an account yet?{' '}
+                                    <span
+                                        className="underline hover:cursor-pointer"
+                                        onClick={handleRegisterRedirect}
+                                    >
+                                        Sign Up
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </form> */}
+                    </form>
                 </CardContent>
             </Card>
             <div className="text-white  text-center text-xs text-balance ">
-                By clicking continue, you agree to our <a href="#" className='underline'>Terms of Service</a> and{' '}
-                <a href="#" className='underline'>Privacy Policy</a>.
+                By clicking continue, you agree to our{' '}
+                <a href="#" className="underline">
+                    Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="#" className="underline">
+                    Privacy Policy
+                </a>
+                .
             </div>
         </div>
     )
