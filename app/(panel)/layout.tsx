@@ -21,7 +21,6 @@ import { Toaster } from 'sonner'
 import type { Metadata } from 'next'
 import '../globals.css'
 
-
 export const metadata: Metadata = {
     title: 'TeachFlow',
     icons: {
@@ -61,7 +60,9 @@ export default async function PanelLayout({
                                             <div className="flex items-center gap-2 hover:cursor-pointer max-w-xs">
                                                 <Avatar className="size-9">
                                                     <AvatarImage
-                                                        src={session.user?.image ?? ''}
+                                                        src={
+                                                            session.user?.image ?? '/user-icon.jpg'
+                                                        }
                                                         alt="User Image Profile"
                                                     />
                                                     <AvatarFallback>User</AvatarFallback>
@@ -104,7 +105,7 @@ export default async function PanelLayout({
                                                     Notifications
                                                 </DropdownMenuItem>
                                             </DropdownMenuGroup> */}
-                                            <DropdownMenuSeparator />
+                                            {/* <DropdownMenuSeparator /> */}
 
                                             {/* LOGOUT MENU */}
                                             <LogoutDialog />
