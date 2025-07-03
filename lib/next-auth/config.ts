@@ -1,10 +1,14 @@
 import { NextAuthConfig } from 'next-auth'
 import { DrizzleAdapter } from '@auth/drizzle-adapter'
+import { db } from '@/database'
 
 import Resend from 'next-auth/providers/resend'
 import Google from 'next-auth/providers/google'
 import Facebook from 'next-auth/providers/facebook'
-import { db } from '@/database'
+import Credentials from 'next-auth/providers/credentials'
+import { ZodError } from 'zod'
+import { signInSchema } from '../zod'
+import { authenticate } from '../queries/user/get'
 
 export const nextAuthConfig: NextAuthConfig = {
     secret: process.env.AUTH_SECRET,
@@ -34,84 +38,31 @@ export const nextAuthConfig: NextAuthConfig = {
             },
         }),
 
-        Facebook({
-            clientId: process.env.FACEBOOK_CLIENT_ID!,
-            clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-            authorization: {
-                params: {
-                    scope: 'email public_profile ',
-                },
+        Credentials({
+            credentials: {
+                email: { label: 'Email', type: 'email' },
+                password: { label: 'Password', type: 'password' },
             },
 
-            profile(profile) {
-                return {
-                    id: profile.id,
-                    name: profile.name,
-                    email: profile.email,
-                    image: profile.picture?.data?.url,
-                }
-            },
-        }),
+            async authorize(credentials) {
+                try {
+                    const { email, password } = await signInSchema.parseAsync(credentials)
 
-        Resend({
-            apiKey: process.env.RESEND_API_KEY,
-            from: process.env.EMAIL_FROM,
+                    console.log('email: ', email)
+                    console.log('password: ', password)
 
-            sendVerificationRequest: async ({ identifier, url, provider }) => {
-                const { host } = new URL(url)
+                    const user = await authenticate(email, password)
 
-                const html = `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center;">
-                            <h1 style="color: white; margin: 0;">Welcome to TeachFlow</h1>
-                        </div>
+                    console.log('user: ', user)
 
-                        <div style="padding: 40px; background: #f8f9fa;">
-                            <h2 style="color: #333; margin-bottom: 20px;">Sign in to your account</h2>
-                            <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
-                                Click the button below to securely sign in to your account. This link will expire in 24 hours.
-                            </p>
+                    if (!user) {
+                        return null
+                    }
 
-                            <a href="${url}" style="
-                                display: inline-block;
-                                background: #667eea;
-                                color: white;
-                                padding: 15px 30px;
-                                text-decoration: none;
-                                border-radius: 8px;
-                                font-weight: bold;
-                                margin-bottom: 20px;
-                            ">
-                                Sign In to TeachFlow
-                            </a>
-
-                            <p style="color: #999; font-size: 14px;">
-                                If you didn't request this email, you can safely ignore it.
-                            </p>
-                        </div>
-                        <div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">
-                        © 2025 TeachFlow. All rights reserved.
-                        </div>
-                    </div>
-                    `
-
-                const res = await fetch('https://api.resend.com/emails', {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${provider.apiKey}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        from: provider.from,
-                        to: identifier,
-                        subject: `Sign in to ${host}`,
-                        html: html,
-                        text: `Sign in to ${host}\n\nClick here to sign in: ${url}\n\nIf you didn't request this email, you can safely ignore it.`,
-                    }),
-                })
-
-                if (!res.ok) {
-                    throw new Error('Failed to send email')
+                    return user
+                } catch (error: any) {
+                    console.error('Error in signing in user: ', error.message)
+                    return null
                 }
             },
         }),
@@ -119,35 +70,31 @@ export const nextAuthConfig: NextAuthConfig = {
 
     callbacks: {
         async signIn({ user, account, profile }) {
-            // Optional: Add custom validation logic here
-
-            // if (account?.provider === 'google') {
-            //     // Example: Only allow verified Google emails
-            //     return profile?.email_verified === true
-            // }
-
-            // if (account?.provider === 'facebook') {
-            //     // Example: Ensure Facebook account has email
-            //     return !!user.email
-            // }
-
-            // For email provider, NextAuth handles verification
+            // Optional: Add custom validation logic here before user data 
+            // gets sent to the session or jwt
             return true
         },
 
-        // PURPOSE OF SESSION IS TO FORMAT WHAT DATA THE USER CAN SEE
-        async session({ session, user }) {
-            // User data comes fresh from database
+        async jwt({ token, user }) {
             if (user) {
-                session.user.id = user.id
-                session.user.email = user.email
-                session.user.name = user.name
-                session.user.image = user.image
+                token.id = user.id
+                token.name = user.name
+                token.email = user.email
+                token.image = user.image
+            }
+            return token
+        },
+
+        async session({ session, token }) {
+            // This formats what the frontend session looks like
+            if (session.user && token) {
+                session.user.id = token.id as string
+                session.user.name = token.name as string
+                session.user.email = token.email as string
+                session.user.image = token.image as string
             }
             return session
         },
-
-       
     },
 
     // THINK OF EVENT LIKE A WEBHOOK WHERE YOU PERFORM BACKGROUND TASK
@@ -161,7 +108,6 @@ export const nextAuthConfig: NextAuthConfig = {
                 isNewUser,
             })
 
-            // You can add custom logic here for new users
             if (isNewUser) {
                 console.log('New user created:', user.email)
                 // Send welcome email, create default settings, etc.
@@ -169,7 +115,7 @@ export const nextAuthConfig: NextAuthConfig = {
         },
 
         async createUser({ user }) {
-            console.log('New user created in database:', {
+            console.log('New_user_created:', {
                 userId: user.id,
                 email: user.email,
             })
@@ -185,12 +131,12 @@ export const nextAuthConfig: NextAuthConfig = {
     },
 
     session: {
-        strategy: 'database',
+        strategy: 'jwt',
+        maxAge: 30 * 24 * 60 * 60, // optional: session valid for 30 days
     },
 
     pages: {
+        signIn: '/auth/signin',
         verifyRequest: '/auth/verify-request',
     },
-
-    debug: process.env.NODE_ENV === 'development',
 }
