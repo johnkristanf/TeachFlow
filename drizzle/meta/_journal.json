@@ -1,48 +1,55 @@
 {
-    "version": "7",
-    "dialect": "postgresql",
-    "entries": [
-        {
-            "idx": 0,
-            "version": "7",
-            "when": 1749867985791,
-            "tag": "0000_dashing_justice",
-            "breakpoints": true
-        },
-        {
-            "idx": 2,
-            "version": "7",
-            "when": 1749954963752,
-            "tag": "0002_familiar_gunslinger",
-            "breakpoints": true
-        },
-        {
-            "idx": 3,
-            "version": "7",
-            "when": 1749955555023,
-            "tag": "0003_mixed_the_fury",
-            "breakpoints": true
-        },
-        {
-            "idx": 4,
-            "version": "7",
-            "when": 1749956846903,
-            "tag": "0004_milky_mindworm",
-            "breakpoints": true
-        },
-        {
-            "idx": 5,
-            "version": "7",
-            "when": 1750494183531,
-            "tag": "0005_sloppy_stark_industries",
-            "breakpoints": true
-        },
-        {
-            "idx": 6,
-            "version": "7",
-            "when": 1750554399976,
-            "tag": "0006_thick_susan_delgado",
-            "breakpoints": true
-        }
-    ]
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1749867985791,
+      "tag": "0000_dashing_justice",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749954963752,
+      "tag": "0002_familiar_gunslinger",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749955555023,
+      "tag": "0003_mixed_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749956846903,
+      "tag": "0004_milky_mindworm",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1750494183531,
+      "tag": "0005_sloppy_stark_industries",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1750554399976,
+      "tag": "0006_thick_susan_delgado",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1751402871072,
+      "tag": "0007_jittery_falcon",
+      "breakpoints": true
+    }
+  ]
 }
