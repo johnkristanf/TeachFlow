@@ -49,9 +49,18 @@ export default function UnAuthenticatedNavBar() {
                             onClick={() => {
                                 router.push('/auth/signin')
                             }}
+                            className="hover:opacity-75 hover:cursor-pointer"
+                        >
+                            Sign In
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                router.push('/auth/register')
+                            }}
                             className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-4 py-2 hover:cursor-pointer rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
                         >
-                            Sign In, It's Free
+                            Get Started
                         </button>
                     </div>
 
