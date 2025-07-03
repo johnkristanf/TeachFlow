@@ -108,6 +108,7 @@ export const users = pgTable('user', {
     id: text('id').primaryKey(),
     email: text('email').unique(),
     name: text('name'),
+    password: text('password'),
     image: text('image'),
     emailVerified: timestamp('emailVerified', { mode: 'date' }),
 })
@@ -146,18 +147,3 @@ export const sessions = pgTable('session', {
     expires: timestamp('expires', { mode: 'date' }).notNull(),
 })
 
-export const verificationTokens = pgTable(
-    'verificationToken',
-    {
-        identifier: text('identifier').notNull(),
-        token: text('token').notNull(),
-        expires: timestamp('expires', { mode: 'date' }).notNull(),
-    },
-    (verificationToken) => [
-        {
-            compositePk: primaryKey({
-                columns: [verificationToken.identifier, verificationToken.token],
-            }),
-        },
-    ]
-)
