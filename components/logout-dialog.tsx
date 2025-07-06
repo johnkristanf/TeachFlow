@@ -11,9 +11,8 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog'
 import { CircleAlert, Loader2, LogOut } from 'lucide-react'
-import { Button } from './ui/button'
 import { signOutUser } from '@/actions/auth'
-import { DropdownMenu, DropdownMenuItem } from './ui/dropdown-menu'
+import { DropdownMenuItem } from './ui/dropdown-menu'
 import { PrimaryButton } from './ui/primary-button'
 
 export default function LogoutDialog() {
