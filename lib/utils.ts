@@ -55,6 +55,16 @@ export const numericTimeStamp = () => {
     return timestamp
 }
 
+export const formatDateMonthYear = (dateString: string) => {
+    const date = new Date(dateString)
+    const formatted = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+    })
+
+    return formatted
+}
+
 export const formatArray = (items: any[]) => (items?.length ? items.join(', ') : 'None')
 
 export const getFileExtension = (fileName: string) => path.extname(fileName).toLowerCase()
