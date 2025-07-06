@@ -50,6 +50,13 @@
       "when": 1751402871072,
       "tag": "0007_jittery_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1751750288907,
+      "tag": "0008_unique_argent",
+      "breakpoints": true
     }
   ]
 }
