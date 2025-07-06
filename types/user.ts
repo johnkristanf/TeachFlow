@@ -10,3 +10,10 @@ export type User = {
     email: string | null
     password: string | null
 }
+
+export type UserProfile = {
+    name: string
+    email: string
+    phone?: string
+    location?: string
+}
