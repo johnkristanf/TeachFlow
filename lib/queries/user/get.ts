@@ -9,8 +9,13 @@ export async function authenticate(email: string, password: string): Promise<Use
         .select({
             id: users.id,
             name: users.name,
+            image: users.image,
             email: users.email,
             password: users.password,
+
+            phone: users.phone,
+            location: users.location,
+            created_at: users.createdAt,
         })
         .from(users)
         .where(eq(users.email, email))
