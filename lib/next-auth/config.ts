@@ -9,6 +9,8 @@ import Credentials from 'next-auth/providers/credentials'
 import { ZodError } from 'zod'
 import { signInSchema } from '../zod'
 import { authenticate } from '../queries/user/get'
+import { accounts, users } from '@/database/schema'
+import { eq } from 'drizzle-orm'
 
 export const nextAuthConfig: NextAuthConfig = {
     secret: process.env.AUTH_SECRET,
@@ -34,6 +36,10 @@ export const nextAuthConfig: NextAuthConfig = {
                     name: profile.name,
                     email: profile.email,
                     image: profile.picture,
+
+                    phone: null,
+                    location: null,
+                    created_at: new Date(),
                 }
             },
         }),
@@ -47,10 +53,6 @@ export const nextAuthConfig: NextAuthConfig = {
             async authorize(credentials) {
                 try {
                     const { email, password } = await signInSchema.parseAsync(credentials)
-
-                    console.log('email: ', email)
-                    console.log('password: ', password)
-
                     const user = await authenticate(email, password)
 
                     console.log('user: ', user)
@@ -70,28 +72,75 @@ export const nextAuthConfig: NextAuthConfig = {
 
     callbacks: {
         async signIn({ user, account, profile }) {
-            // Optional: Add custom validation logic here before user data 
+            // Optional: Add custom validation logic here before user data
             // gets sent to the session or jwt
             return true
         },
 
-        async jwt({ token, user }) {
+        async jwt({ token, user, account, trigger }) {
+            if (trigger === 'update') {
+                console.log('TRIGGERED JWT KA PART')
+
+                try {
+                    const latestUser = await db
+                        .select({
+                            name: users.name,
+                            email: users.email,
+                            phone: users.phone,
+                            location: users.location,
+                            image: users.image,
+                            created_at: users.createdAt,
+                            provider: accounts.provider,
+                        })
+                        .from(users)
+                        .leftJoin(accounts, eq(users.id, accounts.userId))
+                        .where(eq(users.id, token.id as string))
+                        .limit(1)
+
+                    if (latestUser[0]) {
+                        // Update the token with fresh data from database
+                        token.name = latestUser[0].name
+                        token.email = latestUser[0].email
+                        token.phone = latestUser[0].phone
+                        token.location = latestUser[0].location
+                        token.image = latestUser[0].image
+                        token.provider = latestUser[0].provider!
+                        token.created_at = latestUser[0].created_at!
+                    }
+                } catch (error) {
+                    console.error('Error fetching latest user data:', error)
+                }
+            }
+
             if (user) {
                 token.id = user.id
                 token.name = user.name
                 token.email = user.email
                 token.image = user.image
+                token.phone = user.phone
+                token.location = user.location
+                token.provider = account?.provider
+                token.created_at = user.created_at
             }
+
             return token
         },
 
-        async session({ session, token }) {
+        async session({ session, token, trigger }) {
             // This formats what the frontend session looks like
+
+            if (trigger === 'update') {
+                console.log('TRIGGERED SESSION KA PART')
+            }
             if (session.user && token) {
                 session.user.id = token.id as string
                 session.user.name = token.name as string
                 session.user.email = token.email as string
                 session.user.image = token.image as string
+                session.user.phone = token.phone as string
+                session.user.location = token.location as string
+                session.user.provider = token.provider as string
+                session.user.created_at = token.created_at as Date
             }
             return session
         },
