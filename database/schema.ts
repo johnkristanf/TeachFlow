@@ -111,6 +111,9 @@ export const users = pgTable('user', {
     password: text('password'),
     image: text('image'),
     emailVerified: timestamp('emailVerified', { mode: 'date' }),
+    phone: text('phone'),
+    location: text('location'),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })
 
 // ACCOUNTS
@@ -146,4 +149,3 @@ export const sessions = pgTable('session', {
         .references(() => users.id, { onDelete: 'cascade' }),
     expires: timestamp('expires', { mode: 'date' }).notNull(),
 })
-
